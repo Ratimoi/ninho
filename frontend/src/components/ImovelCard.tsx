@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import type { ImovelType } from "../utils/types"
+import { resolverUrlImagem } from "../utils/imagem"
 
 export function ImovelCard({ data }: { data: ImovelType }) {
     const capa = data.imagens.find(img => img.capa) ?? data.imagens[0]
@@ -8,7 +9,7 @@ export function ImovelCard({ data }: { data: ImovelType }) {
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
             <div className="h-40 bg-gray-100 flex items-center justify-center">
                 {capa ? (
-                    <img src={capa.url} alt={data.titulo} className="w-full h-full object-cover" />
+                    <img src={resolverUrlImagem(capa.url)} alt={data.titulo} className="w-full h-full object-cover" />
                 ) : (
                     <span className="text-gray-400 text-sm">Sem foto</span>
                 )}

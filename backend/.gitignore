@@ -4,6 +4,9 @@ node_modules
 
 /generated/prisma
 
+# Arquivos enviados por upload (imagens de imoveis)
+/uploads
+
 # Compiled output
 /dist
 src/*.js

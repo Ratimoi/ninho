@@ -1,8 +1,11 @@
 import { Router } from "express"
 import { z } from 'zod'
+import path from "path"
+import fs from "fs"
 import { prisma } from "../../lib/prisma"
 import { autenticarCliente, autenticarQualquer } from "../../lib/auth"
 import { gerarInsightImovel } from "../../lib/ai"
+import { upload, pastaUploads } from "../../lib/upload"
 
 const router = Router()
 
@@ -156,6 +159,101 @@ router.patch("/:id/destaque", autenticarQualquer, async (req, res) => {
     try {
         const imovel = await prisma.imovel.update({ where: { id }, data: { destaque } })
         res.status(200).json(imovel)
+    } catch (error) {
+        res.status(400).json({ erro: error })
+    }
+})
+
+async function verificarDono(req: any, res: any, imovelId: number) {
+    const imovel = await prisma.imovel.findUnique({ where: { id: imovelId } })
+    if (!imovel) {
+        res.status(404).json({ erro: "Imóvel não encontrado" })
+        return null
+    }
+
+    const ehDono = req.usuario!.papel === "cliente" && imovel.proprietarioId === req.usuario!.id
+    const ehAdmin = req.usuario!.papel === "admin"
+    if (!ehDono && !ehAdmin) {
+        res.status(403).json({ erro: "Sem permissão para gerenciar as fotos deste imóvel" })
+        return null
+    }
+
+    return imovel
+}
+
+router.post("/:id/imagens", autenticarQualquer, upload.array("imagens", 10), async (req, res) => {
+    const id = Number(req.params.id)
+    const arquivos = req.files as Express.Multer.File[] | undefined
+
+    if (!arquivos || arquivos.length === 0) {
+        res.status(400).json({ erro: "Nenhuma imagem enviada" })
+        return
+    }
+
+    try {
+        const imovel = await verificarDono(req, res, id)
+        if (!imovel) return
+
+        const totalAtual = await prisma.imovelImagem.count({ where: { imovelId: id } })
+
+        const criadas = await prisma.$transaction(
+            arquivos.map((arquivo, i) =>
+                prisma.imovelImagem.create({
+                    data: {
+                        imovelId: id,
+                        url: `/uploads/${arquivo.filename}`,
+                        ordem: totalAtual + i,
+                        capa: totalAtual === 0 && i === 0
+                    }
+                })
+            )
+        )
+
+        res.status(201).json(criadas)
+    } catch (error) {
+        res.status(400).json({ erro: error })
+    }
+})
+
+router.patch("/:id/imagens/:imagemId/capa", autenticarQualquer, async (req, res) => {
+    const id = Number(req.params.id)
+    const imagemId = Number(req.params.imagemId)
+
+    try {
+        const imovel = await verificarDono(req, res, id)
+        if (!imovel) return
+
+        await prisma.$transaction([
+            prisma.imovelImagem.updateMany({ where: { imovelId: id }, data: { capa: false } }),
+            prisma.imovelImagem.update({ where: { id: imagemId }, data: { capa: true } })
+        ])
+
+        res.status(204).send()
+    } catch (error) {
+        res.status(400).json({ erro: error })
+    }
+})
+
+router.delete("/:id/imagens/:imagemId", autenticarQualquer, async (req, res) => {
+    const id = Number(req.params.id)
+    const imagemId = Number(req.params.imagemId)
+
+    try {
+        const imovel = await verificarDono(req, res, id)
+        if (!imovel) return
+
+        const imagem = await prisma.imovelImagem.findUnique({ where: { id: imagemId } })
+        if (!imagem || imagem.imovelId !== id) {
+            res.status(404).json({ erro: "Imagem não encontrada" })
+            return
+        }
+
+        await prisma.imovelImagem.delete({ where: { id: imagemId } })
+
+        const caminhoArquivo = path.join(pastaUploads, path.basename(imagem.url))
+        fs.unlink(caminhoArquivo, () => {})
+
+        res.status(204).send()
     } catch (error) {
         res.status(400).json({ erro: error })
     }
