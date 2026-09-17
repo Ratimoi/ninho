@@ -2,6 +2,10 @@
 
 Passo a passo pra colocar o projeto no ar: banco no Supabase, backend no Render, frontend na Vercel.
 
+**URLs em produção:**
+- Backend: https://ninho-api.onrender.com
+- Frontend: https://ninho-kappa.vercel.app
+
 ## 1. Banco de dados (Supabase)
 
 1. Crie uma conta em https://supabase.com e um novo projeto.
@@ -41,7 +45,7 @@ Passo a passo pra colocar o projeto no ar: banco no Supabase, backend no Render,
    - Framework preset: Vite (detecta sozinho)
 3. Variável de ambiente:
    - `VITE_API_URL` — a URL do backend no Render (passo 2.5).
-4. Depois do deploy, pegue a URL da Vercel (ex: `https://ninho.vercel.app`) e volte no Render pra preencher `FRONTEND_URL` com ela — assim o CORS do backend passa a aceitar só essa origem.
+4. Depois do deploy, pegue a URL real que a Vercel atribuiu ao projeto (confira no dashboard — se o nome já estiver em uso por outra conta, ela adiciona um sufixo, ex: `ninho-kappa.vercel.app` em vez de `ninho.vercel.app`) e volte no Render pra preencher `FRONTEND_URL` com ela — assim o CORS do backend passa a aceitar só essa origem.
 
 ## 4. Conferindo
 
