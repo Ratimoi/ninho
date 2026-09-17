@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Usuario {
+  id              String @id @default(uuid())
+  nome            String
+  email           String @unique
+  senha           String
+  imoveis         Imovel[]  @relation("ImoveisDoDono")
+  reservas        Reserva[] @relation("ReservasDoCliente")
+  @@map("usuario")
+}
+
+model Admin {
+  id              String @id @default(uuid())
+  nome            String
+  email           String @unique
+  senha           String
+  @@map("admin")
+}
+
+model Imovel {
+  id              Int @id @default(autoincrement())
+  proprietario    Usuario @relation("ImoveisDoDono", fields: [proprietarioId], references: [id])
+  proprietarioId  String
+  titulo          String
+  descricao       String?
+  preco           Decimal @db.Decimal(10, 2)
+  endereco        String
+  cidade          String
+  quartos         Int
+  destaque        Boolean @default(false)
+  reservas        Reserva[]
+  imagens         ImovelImagem[]
+  @@map("imovel")
+}
+
+model ImovelImagem {
+  id        Int @id @default(autoincrement())
+  imovel    Imovel @relation(fields: [imovelId], references: [id])
+  imovelId  Int
+  url       String
+  ordem     Int      @default(0)
+  capa      Boolean  @default(false)
+  criadaEm  DateTime @default(now())
+  @@map("imovel_imagem")
+}
+
+model Reserva {
+  id              Int @id @default(autoincrement())
+  imovel          Imovel @relation(fields: [imovelId], references: [id])
+  imovelId        Int
+  cliente         Usuario @relation("ReservasDoCliente", fields: [clienteId], references: [id])
+  clienteId       String
+  status          Status @default(PENDENTE)
+  dataInicio      DateTime
+  dataFim         DateTime
+  nota            Int?
+  avaliacao       String?
+  respostaAdmin   String?
+  valorTotal      Float
+  @@map("reserva")
+}
+
+enum Status {
+  PENDENTE
+  CONFIRMADA
+  CANCELADA
+}
