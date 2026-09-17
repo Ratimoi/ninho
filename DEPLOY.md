@@ -1,11 +1,13 @@
 # Deploy — Ninho
 
-Passo a passo pra colocar o projeto no ar: banco no Neon, backend no Render, frontend na Vercel.
+Passo a passo pra colocar o projeto no ar: banco no Supabase, backend no Render, frontend na Vercel.
 
-## 1. Banco de dados (Neon)
+## 1. Banco de dados (Supabase)
 
-1. Crie uma conta em https://neon.tech e um novo projeto/banco Postgres.
-2. Copie a **connection string** (formato `postgresql://usuario:senha@host/banco?sslmode=require`).
+1. Crie uma conta em https://supabase.com e um novo projeto.
+2. Em **Project Settings → Database → Connection string**, copie a URL no formato `postgresql://postgres:[SENHA]@[HOST]:5432/postgres`.
+   - Use a conexão **direta** (porta 5432) pro Render — ele fica sempre ligado, então não precisa do pooler (porta 6543, pensado pra ambientes serverless).
+   - Troque `[SENHA]` pela senha do banco que você definiu ao criar o projeto.
 3. Guarde essa URL — vai virar a `DATABASE_URL` do backend no Render.
 
 ## 2. Backend (Render)
@@ -16,14 +18,14 @@ Passo a passo pra colocar o projeto no ar: banco no Neon, backend no Render, fro
    - **Build Command**: `npm install && npm run build`
    - **Start Command**: `npm start`
 3. Variáveis de ambiente (aba *Environment*):
-   - `DATABASE_URL` — a connection string do Neon (passo 1).
+   - `DATABASE_URL` — a connection string do Supabase (passo 1).
    - `JWT_SECRET` — um valor aleatório forte (ex: gere com `openssl rand -hex 32`).
    - `ANTHROPIC_API_KEY` — opcional, ativa o insight de IA na página do imóvel.
    - `FRONTEND_URL` — a URL da Vercel (passo 3); pode deixar em branco por enquanto e preencher depois.
-4. Depois do primeiro deploy, rode as migrations contra o banco do Neon (uma vez, localmente):
+4. Depois do primeiro deploy, rode as migrations contra o banco do Supabase (uma vez, localmente):
    ```bash
    cd backend
-   DATABASE_URL="<url do neon>" npx prisma db push
+   DATABASE_URL="<url do supabase>" npx prisma db push
    ```
 5. Anote a URL pública que o Render gerou (ex: `https://ninho-api.onrender.com`) — vai virar a `VITE_API_URL` do frontend.
 
