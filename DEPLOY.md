@@ -5,10 +5,12 @@ Passo a passo pra colocar o projeto no ar: banco no Supabase, backend no Render,
 ## 1. Banco de dados (Supabase)
 
 1. Crie uma conta em https://supabase.com e um novo projeto.
-2. Em **Project Settings → Database → Connection string**, copie a URL no formato `postgresql://postgres:[SENHA]@[HOST]:5432/postgres`.
-   - Use a conexão **direta** (porta 5432) pro Render — ele fica sempre ligado, então não precisa do pooler (porta 6543, pensado pra ambientes serverless).
-   - Troque `[SENHA]` pela senha do banco que você definiu ao criar o projeto.
-3. Guarde essa URL — vai virar a `DATABASE_URL` do backend no Render.
+2. **Importante:** a conexão "direta" do Supabase (`db.<ref>.supabase.co:5432`) só resolve por **IPv6** — em rede/ambiente sem IPv6 (comum), a conexão falha com `P1001: Can't reach database server`. Use sempre o **Session pooler** em vez da conexão direta:
+   - Vá em **Project Settings → Database → Connection pooling**.
+   - Copie a URL do **Session pooler** (porta 5432, host tipo `aws-0-<regiao>.pooler.supabase.com`), formato:
+     `postgresql://postgres.<ref-do-projeto>:[SENHA]@aws-0-<regiao>.pooler.supabase.com:5432/postgres`
+   - Troque `[SENHA]` pela senha do banco definida ao criar o projeto.
+3. Guarde essa URL — vai virar a `DATABASE_URL` do backend no Render (use a mesma URL do pooler lá também).
 
 ## 2. Backend (Render)
 
