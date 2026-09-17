@@ -13,7 +13,10 @@ dotenv.config()
 
 const app = express()
 
-app.use(cors())
+// Em produção, restringe o CORS à URL do frontend (definida no deploy).
+// Sem essa variável (ex: em dev local), libera qualquer origem.
+const origensPermitidas = process.env.FRONTEND_URL
+app.use(cors(origensPermitidas ? { origin: origensPermitidas } : undefined))
 app.use(express.json())
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")))
 
