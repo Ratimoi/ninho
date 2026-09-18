@@ -33,16 +33,24 @@ Não invente números exatos de distância ou estatísticas oficiais; fale em te
 Responda só com o texto, sem introdução.`
 
     try {
+        const controle = new AbortController()
+        const timeout = setTimeout(() => controle.abort(), 12000)
+
         const resposta = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
             {
                 method: "POST",
                 headers: { "content-type": "application/json" },
+                signal: controle.signal,
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
+                    contents: [{ parts: [{ text: prompt }] }],
+                    // Desliga o "thinking" do Gemini 2.5 — sem isso, a resposta
+                    // pode demorar dezenas de segundos, inviável pra um banner de home.
+                    generationConfig: { thinkingConfig: { thinkingBudget: 0 } }
                 })
             }
         )
+        clearTimeout(timeout)
 
         if (!resposta.ok) {
             return {
@@ -63,10 +71,9 @@ Responda só com o texto, sem introdução.`
 
         return { disponivel: true, fonte: "IA", texto: texto.trim() }
     } catch (error) {
-        return {
-            disponivel: false,
-            fonte: "IA",
-            motivo: "Erro ao contatar a IA"
-        }
+        const motivo = error instanceof Error && error.name === "AbortError"
+            ? "IA demorou demais para responder"
+            : "Erro ao contatar a IA"
+        return { disponivel: false, fonte: "IA", motivo }
     }
 }
