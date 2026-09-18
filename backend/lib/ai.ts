@@ -16,13 +16,13 @@ export interface InsightIA {
 }
 
 export async function gerarInsightImovel(imovel: ImovelParaIA): Promise<InsightIA> {
-    const apiKey = process.env.ANTHROPIC_API_KEY
+    const apiKey = process.env.GEMINI_API_KEY
 
     if (!apiKey) {
         return {
             disponivel: false,
             fonte: "IA",
-            motivo: "ANTHROPIC_API_KEY não configurada"
+            motivo: "GEMINI_API_KEY não configurada"
         }
     }
 
@@ -33,19 +33,16 @@ Não invente números exatos de distância ou estatísticas oficiais; fale em te
 Responda só com o texto, sem introdução.`
 
     try {
-        const resposta = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-                "content-type": "application/json",
-                "x-api-key": apiKey,
-                "anthropic-version": "2023-06-01"
-            },
-            body: JSON.stringify({
-                model: "claude-haiku-4-5-20251001",
-                max_tokens: 200,
-                messages: [{ role: "user", content: prompt }]
-            })
-        })
+        const resposta = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+            {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            }
+        )
 
         if (!resposta.ok) {
             return {
@@ -55,14 +52,16 @@ Responda só com o texto, sem introdução.`
             }
         }
 
-        const dados = await resposta.json() as { content: { type: string, text?: string }[] }
-        const texto = dados.content.find(c => c.type === "text")?.text
+        const dados = await resposta.json() as {
+            candidates?: { content?: { parts?: { text?: string }[] } }[]
+        }
+        const texto = dados.candidates?.[0]?.content?.parts?.[0]?.text
 
         if (!texto) {
             return { disponivel: false, fonte: "IA", motivo: "IA não retornou texto" }
         }
 
-        return { disponivel: true, fonte: "IA", texto }
+        return { disponivel: true, fonte: "IA", texto: texto.trim() }
     } catch (error) {
         return {
             disponivel: false,

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
+import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import { ImovelCard } from "../components/ImovelCard"
-import type { ImovelType } from "../utils/types"
+import type { ImovelType, InsightIA } from "../utils/types"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -10,9 +11,15 @@ type Inputs = {
     termo: string
 }
 
+type InsightDestaque = {
+    imovel: { id: number, titulo: string, cidade: string } | null
+    insightIA: InsightIA | null
+}
+
 export default function Home() {
     const [imoveis, setImoveis] = useState<ImovelType[]>([])
     const [somenteDestaques, setSomenteDestaques] = useState(false)
+    const [insight, setInsight] = useState<InsightDestaque>()
     const { register, handleSubmit, reset } = useForm<Inputs>()
 
     async function buscarImoveis(termo?: string, destaque?: boolean) {
@@ -28,6 +35,12 @@ export default function Home() {
 
     useEffect(() => {
         buscarImoveis()
+
+        async function buscarInsight() {
+            const response = await fetch(`${apiUrl}/imovel/insight-destaque`)
+            if (response.ok) setInsight(await response.json())
+        }
+        buscarInsight()
     }, [])
 
     async function enviaPesquisa(data: Inputs) {
@@ -56,6 +69,24 @@ export default function Home() {
             <h1 className="mb-4 text-3xl md:text-5xl font-extrabold text-gray-900">
                 Encontre o imóvel <span className="text-emerald-700">certo pra você</span>
             </h1>
+
+            {insight?.imovel && insight.insightIA && (
+                <div className="mb-6 p-4 bg-sky-50 border border-sky-200 rounded-lg">
+                    <p className="text-xs font-semibold text-sky-700 mb-1 uppercase tracking-wide">
+                        ✨ Dado obtido por consulta a uma IA — sobre {insight.imovel.titulo}
+                    </p>
+                    {insight.insightIA.disponivel ? (
+                        <p className="text-sky-900 text-sm">{insight.insightIA.texto}</p>
+                    ) : (
+                        <p className="text-sky-700 text-sm italic">
+                            Insight indisponível no momento ({insight.insightIA.motivo}).
+                        </p>
+                    )}
+                    <Link to={`/imovel/${insight.imovel.id}`} className="text-sm text-sky-700 underline mt-1 inline-block">
+                        Ver imóvel
+                    </Link>
+                </div>
+            )}
 
             <div className="flex flex-wrap gap-3 mb-6">
                 <form className="flex-1 min-w-64" onSubmit={handleSubmit(enviaPesquisa)}>

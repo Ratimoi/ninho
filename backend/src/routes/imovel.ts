@@ -63,6 +63,37 @@ router.get("/", async (req, res) => {
     }
 })
 
+// Requisito 3: a página principal (home) exibe um dado obtido por consulta à IA,
+// sobre o imóvel em destaque (ou o mais recente, se não houver nenhum destacado).
+router.get("/insight-destaque", async (req, res) => {
+    try {
+        const imovel = await prisma.imovel.findFirst({
+            where: { destaque: true },
+            orderBy: { id: "desc" }
+        }) ?? await prisma.imovel.findFirst({ orderBy: { id: "desc" } })
+
+        if (!imovel) {
+            res.status(200).json({ imovel: null, insightIA: null })
+            return
+        }
+
+        const insightIA = await gerarInsightImovel({
+            titulo: imovel.titulo,
+            cidade: imovel.cidade,
+            endereco: imovel.endereco,
+            quartos: imovel.quartos,
+            preco: Number(imovel.preco)
+        })
+
+        res.status(200).json({
+            imovel: { id: imovel.id, titulo: imovel.titulo, cidade: imovel.cidade },
+            insightIA
+        })
+    } catch (error) {
+        res.status(500).json({ erro: error })
+    }
+})
+
 router.get("/:id", async (req, res) => {
     const id = Number(req.params.id)
 
