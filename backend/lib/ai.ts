@@ -15,7 +15,28 @@ export interface InsightIA {
     motivo?: string
 }
 
+// Cache em memória: evita gerar o mesmo insight a cada carregamento de página
+// (a API de IA tem cota limitada, e o texto não muda enquanto o imóvel não muda).
+const cache = new Map<string, { expiraEm: number, valor: InsightIA }>()
+const TTL_SUCESSO = 6 * 60 * 60 * 1000 // 6 horas
+const TTL_FALHA = 2 * 60 * 1000 // 2 minutos (permite recuperar rápido de um erro temporário)
+
 export async function gerarInsightImovel(imovel: ImovelParaIA): Promise<InsightIA> {
+    const chave = `${imovel.titulo}|${imovel.cidade}|${imovel.endereco}|${imovel.quartos}|${imovel.preco}`
+    const emCache = cache.get(chave)
+    if (emCache && emCache.expiraEm > Date.now()) {
+        return emCache.valor
+    }
+
+    const insight = await consultarIA(imovel)
+    cache.set(chave, {
+        expiraEm: Date.now() + (insight.disponivel ? TTL_SUCESSO : TTL_FALHA),
+        valor: insight
+    })
+    return insight
+}
+
+async function consultarIA(imovel: ImovelParaIA): Promise<InsightIA> {
     const apiKey = process.env.GEMINI_API_KEY
 
     if (!apiKey) {
