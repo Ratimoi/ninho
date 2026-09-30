@@ -26,7 +26,9 @@ Passo a passo pra colocar o projeto no ar: banco no Supabase, backend no Render,
 3. Variáveis de ambiente (aba *Environment*):
    - `DATABASE_URL` — a connection string do Supabase (passo 1).
    - `JWT_SECRET` — um valor aleatório forte (ex: gere com `openssl rand -hex 32`).
-   - `ANTHROPIC_API_KEY` — opcional, ativa o insight de IA na página do imóvel.
+   - `GEMINI_API_KEY` — opcional, ativa o insight de IA (Google Gemini) na home. Gere em https://aistudio.google.com/apikey.
+   - `RESEND_API_KEY` — opcional, ativa o envio de e-mail quando o admin responde a uma interação. Gere em https://resend.com/api-keys.
+     **Limitação do modo sandbox** (sem verificar domínio próprio): só entrega e-mails pro endereço usado no cadastro da conta Resend — pra qualquer destinatário, é preciso verificar um domínio em resend.com/domains e trocar o `from` em `backend/lib/email.ts`.
    - `FRONTEND_URL` — a URL da Vercel (passo 3); pode deixar em branco por enquanto e preencher depois.
 4. Depois do primeiro deploy, rode as migrations contra o banco do Supabase (uma vez, localmente):
    ```bash

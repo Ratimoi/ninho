@@ -2,6 +2,7 @@ import { Router } from "express"
 import { z } from 'zod'
 import { prisma } from "../../lib/prisma"
 import { autenticarCliente, autenticarAdmin } from "../../lib/auth"
+import { enviarEmailResposta } from "../../lib/email"
 
 const router = Router()
 
@@ -115,7 +116,7 @@ router.put("/:id/avaliar", autenticarCliente, async (req, res) => {
     }
 })
 
-// Requisito 11: admin responde à interação do cliente.
+// Requisito 11: admin responde à interação do cliente (e envia e-mail com a resposta).
 router.put("/:id/responder", autenticarAdmin, async (req, res) => {
     const id = Number(req.params.id)
 
@@ -126,8 +127,20 @@ router.put("/:id/responder", autenticarAdmin, async (req, res) => {
     }
 
     try {
-        const reserva = await prisma.reserva.update({ where: { id }, data: valida.data })
-        res.status(200).json(reserva)
+        const reserva = await prisma.reserva.update({
+            where: { id },
+            data: valida.data,
+            include: { imovel: { select: { titulo: true } }, cliente: { select: { nome: true, email: true } } }
+        })
+
+        const email = await enviarEmailResposta({
+            destinatarioEmail: reserva.cliente.email,
+            destinatarioNome: reserva.cliente.nome,
+            imovelTitulo: reserva.imovel.titulo,
+            resposta: valida.data.respostaAdmin
+        })
+
+        res.status(200).json({ ...reserva, email })
     } catch (error) {
         res.status(400).json({ erro: error })
     }

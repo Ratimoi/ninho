@@ -42,7 +42,14 @@ export default function ReservasAdmin() {
             return
         }
 
-        toast.success("Resposta enviada")
+        const resultado = await response.json()
+        if (resultado.email?.enviado) {
+            toast.success("Resposta enviada e e-mail entregue ao cliente")
+        } else {
+            toast.success("Resposta salva", {
+                description: `E-mail não enviado (${resultado.email?.motivo ?? "motivo desconhecido"})`
+            })
+        }
         buscar()
     }
 
