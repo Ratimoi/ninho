@@ -83,6 +83,23 @@ router.post("/", autenticarCliente, async (req, res) => {
             return
         }
 
+        // Duas reservas do mesmo imóvel não podem se sobrepor (reservas canceladas
+        // não contam). Checagem em nível de aplicação: sob concorrência extrema
+        // (duas requisições simultâneas) ainda há uma pequena janela de corrida,
+        // já que o Postgres não tem aqui uma constraint de exclusão de intervalo.
+        const conflito = await prisma.reserva.findFirst({
+            where: {
+                imovelId,
+                status: { not: "CANCELADA" },
+                dataInicio: { lt: dataFim },
+                dataFim: { gt: dataInicio }
+            }
+        })
+        if (conflito) {
+            res.status(409).json({ erro: "Este imóvel já está reservado nesse período" })
+            return
+        }
+
         const reserva = await prisma.reserva.create({
             data: { imovelId, dataInicio, dataFim, valorTotal, clienteId: req.usuario!.id }
         })
