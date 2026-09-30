@@ -2,6 +2,7 @@ import { Router } from "express"
 import { z } from 'zod'
 import { prisma } from "../../lib/prisma"
 import { hashSenha, compararSenha, gerarToken, autenticarCliente } from "../../lib/auth"
+import { tratarErroPrisma } from "../../lib/erros"
 
 const router = Router()
 
@@ -107,7 +108,7 @@ router.put("/me", autenticarCliente, async (req, res) => {
         })
         res.status(200).json(usuario)
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res)
     }
 })
 
@@ -116,7 +117,7 @@ router.delete("/me", autenticarCliente, async (req, res) => {
         await prisma.usuario.delete({ where: { id: req.usuario!.id } })
         res.status(204).send()
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res, { emUso: "Não é possível excluir a conta: você ainda tem imóveis ou reservas cadastrados" })
     }
 })
 

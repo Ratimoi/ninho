@@ -6,6 +6,7 @@ import { prisma } from "../../lib/prisma"
 import { autenticarCliente, autenticarQualquer } from "../../lib/auth"
 import { gerarInsightImovel } from "../../lib/ai"
 import { upload, pastaUploads } from "../../lib/upload"
+import { tratarErroPrisma } from "../../lib/erros"
 
 const router = Router()
 
@@ -173,7 +174,7 @@ router.put("/:id", autenticarQualquer, async (req, res) => {
         const atualizado = await prisma.imovel.update({ where: { id }, data: valida.data })
         res.status(200).json(atualizado)
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res)
     }
 })
 
@@ -191,7 +192,7 @@ router.patch("/:id/destaque", autenticarQualquer, async (req, res) => {
         const imovel = await prisma.imovel.update({ where: { id }, data: { destaque } })
         res.status(200).json(imovel)
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res)
     }
 })
 
@@ -242,7 +243,7 @@ router.post("/:id/imagens", autenticarQualquer, upload.array("imagens", 10), asy
 
         res.status(201).json(criadas)
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res)
     }
 })
 
@@ -261,7 +262,7 @@ router.patch("/:id/imagens/:imagemId/capa", autenticarQualquer, async (req, res)
 
         res.status(204).send()
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res)
     }
 })
 
@@ -286,7 +287,7 @@ router.delete("/:id/imagens/:imagemId", autenticarQualquer, async (req, res) => 
 
         res.status(204).send()
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res)
     }
 })
 
@@ -310,7 +311,7 @@ router.delete("/:id", autenticarQualquer, async (req, res) => {
         await prisma.imovel.delete({ where: { id } })
         res.status(204).send()
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res, { emUso: "Não é possível excluir um imóvel que já tem reservas" })
     }
 })
 

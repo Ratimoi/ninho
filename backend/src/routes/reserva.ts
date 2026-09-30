@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from "../../lib/prisma"
 import { autenticarCliente, autenticarAdmin } from "../../lib/auth"
 import { enviarEmailResposta } from "../../lib/email"
+import { tratarErroPrisma } from "../../lib/erros"
 
 const router = Router()
 
@@ -105,7 +106,7 @@ router.post("/", autenticarCliente, async (req, res) => {
         })
         res.status(201).json(reserva)
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res)
     }
 })
 
@@ -129,7 +130,7 @@ router.put("/:id/avaliar", autenticarCliente, async (req, res) => {
         const atualizada = await prisma.reserva.update({ where: { id }, data: valida.data })
         res.status(200).json(atualizada)
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res)
     }
 })
 
@@ -159,7 +160,7 @@ router.put("/:id/responder", autenticarAdmin, async (req, res) => {
 
         res.status(200).json({ ...reserva, email })
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res)
     }
 })
 
@@ -177,7 +178,7 @@ router.put("/:id/status", autenticarAdmin, async (req, res) => {
         const reserva = await prisma.reserva.update({ where: { id }, data: valida.data })
         res.status(200).json(reserva)
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res)
     }
 })
 
@@ -189,7 +190,7 @@ router.delete("/:id", autenticarAdmin, async (req, res) => {
         await prisma.reserva.delete({ where: { id } })
         res.status(204).send()
     } catch (error) {
-        res.status(400).json({ erro: error })
+        tratarErroPrisma(error, res)
     }
 })
 
