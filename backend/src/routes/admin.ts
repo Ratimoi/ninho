@@ -18,8 +18,8 @@ const loginSchema = z.object({
 
 const semSenha = { id: true, nome: true, email: true }
 
-// Sem middleware de autenticação: é a rota que cria o primeiro admin do sistema.
-// Depois de ter pelo menos um admin, o ideal é restringir/remover esta rota.
+// Só é pública enquanto não existe nenhum admin (bootstrap do sistema).
+// Depois do primeiro, criar outro admin exige estar logado como admin.
 router.post("/cadastro", async (req, res) => {
     const valida = adminSchema.safeParse(req.body)
     if (!valida.success) {
@@ -27,8 +27,18 @@ router.post("/cadastro", async (req, res) => {
         return
     }
 
-    const { nome, email, senha } = valida.data
+    const totalAdmins = await prisma.admin.count()
+    if (totalAdmins > 0) {
+        autenticarAdmin(req, res, async () => {
+            await criarAdmin(req, res, valida.data)
+        })
+        return
+    }
 
+    await criarAdmin(req, res, valida.data)
+})
+
+async function criarAdmin(req: any, res: any, { nome, email, senha }: { nome: string, email: string, senha: string }) {
     try {
         const admin = await prisma.admin.create({
             data: { nome, email, senha: await hashSenha(senha) },
@@ -42,7 +52,7 @@ router.post("/cadastro", async (req, res) => {
         }
         res.status(400).json({ erro: error })
     }
-})
+}
 
 router.post("/login", async (req, res) => {
     const valida = loginSchema.safeParse(req.body)

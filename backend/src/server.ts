@@ -1,7 +1,8 @@
-import express from "express"
+import express, { type Request, type Response, type NextFunction } from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import path from "path"
+import { MulterError } from "multer"
 
 import routesImoveis from './routes/imovel'
 import routesReservas from './routes/reserva'
@@ -30,6 +31,20 @@ app.get("/", (req, res) => {
     res.json({
         message: "API do sistema de aluguel de imóveis está funcionando"
     })
+})
+
+// Erros do multer (tipo de arquivo inválido, tamanho acima do limite) chegam
+// aqui via next(err) e passariam batido pelo try/catch das rotas normais.
+app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
+    if (err instanceof MulterError) {
+        res.status(400).json({ erro: err.message })
+        return
+    }
+    if (err instanceof Error && err.message === "Somente arquivos de imagem são permitidos") {
+        res.status(400).json({ erro: err.message })
+        return
+    }
+    next(err)
 })
 
 const PORT = process.env.PORT || 3000
