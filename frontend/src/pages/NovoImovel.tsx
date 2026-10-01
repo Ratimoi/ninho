@@ -4,6 +4,8 @@ import { Navigate, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { obterClienteToken } from "../utils/auth"
 import { GerenciarFotos } from "../components/GerenciarFotos"
+import { Button } from "../components/ui/Button"
+import { Card } from "../components/ui/Card"
 import type { ImagemType } from "../utils/types"
 
 const apiUrl = import.meta.env.VITE_API_URL
@@ -88,47 +90,43 @@ export default function NovoImovel() {
 
     if (imovelCriado) {
         return (
-            <div className="max-w-lg mx-auto">
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">Adicionar fotos</h1>
-                <p className="text-sm text-gray-600 mb-4">
-                    Opcional, mas imóveis com fotos recebem muito mais interesse. Dá pra adicionar mais depois também.
-                </p>
-                <GerenciarFotos imovelId={imovelCriado.id} imagens={imovelCriado.imagens} onAtualizar={atualizarImagens} />
-                <button
-                    onClick={() => navigate(`/imovel/${imovelCriado.id}`)}
-                    className="w-full mt-4 p-3 text-white bg-emerald-700 rounded-lg hover:bg-emerald-800"
-                >
-                    Concluir e ver anúncio
-                </button>
+            <div className="max-w-lg mx-auto mt-6">
+                <Card className="p-8">
+                    <h1 className="text-2xl font-display font-semibold text-brand-900 mb-1">Adicionar fotos</h1>
+                    <p className="text-sm text-gray-500 mb-5">
+                        Opcional, mas imóveis com fotos recebem muito mais interesse. Dá pra adicionar mais depois também.
+                    </p>
+                    <GerenciarFotos imovelId={imovelCriado.id} imagens={imovelCriado.imagens} onAtualizar={atualizarImagens} />
+                    <Button onClick={() => navigate(`/imovel/${imovelCriado.id}`)} className="w-full mt-5">
+                        Concluir e ver anúncio
+                    </Button>
+                </Card>
             </div>
         )
     }
 
     return (
-        <div className="max-w-lg mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Anunciar imóvel</h1>
-            <form onSubmit={handleSubmit(cadastrar)} className="flex flex-col gap-3">
-                <input placeholder="Título" className="p-3 border border-gray-300 rounded-lg" required {...register("titulo")} />
-                <input placeholder="Endereço" className="p-3 border border-gray-300 rounded-lg" required {...register("endereco")} />
-                <input placeholder="Cidade" className="p-3 border border-gray-300 rounded-lg" required {...register("cidade")} />
-                <input type="number" placeholder="Quartos" className="p-3 border border-gray-300 rounded-lg" required {...register("quartos")} />
+        <div className="max-w-lg mx-auto mt-6">
+            <Card className="p-8">
+                <h1 className="text-2xl font-display font-semibold text-brand-900 mb-5">Anunciar imóvel</h1>
+                <form onSubmit={handleSubmit(cadastrar)} className="flex flex-col gap-3">
+                    <input placeholder="Título" className="p-3 border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400" required {...register("titulo")} />
+                    <input placeholder="Endereço" className="p-3 border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400" required {...register("endereco")} />
+                    <input placeholder="Cidade" className="p-3 border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400" required {...register("cidade")} />
+                    <input type="number" placeholder="Quartos" className="p-3 border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400" required {...register("quartos")} />
 
-                <button
-                    type="button"
-                    onClick={gerarComIA}
-                    disabled={gerandoIA}
-                    className="p-3 text-sky-800 bg-sky-50 border border-sky-200 rounded-lg hover:bg-sky-100 disabled:opacity-60"
-                >
-                    {gerandoIA ? "Gerando..." : "✨ Gerar descrição e preço com IA"}
-                </button>
+                    <Button type="button" variant="accent" onClick={gerarComIA} disabled={gerandoIA}>
+                        {gerandoIA ? "Gerando..." : "✨ Gerar descrição e preço com IA"}
+                    </Button>
 
-                <textarea placeholder="Descrição" className="p-3 border border-gray-300 rounded-lg" rows={4} {...register("descricao")} />
-                <input type="number" step="0.01" placeholder="Preço mensal (R$)" className="p-3 border border-gray-300 rounded-lg" required {...register("preco")} />
+                    <textarea placeholder="Descrição" className="p-3 border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400" rows={4} {...register("descricao")} />
+                    <input type="number" step="0.01" placeholder="Preço mensal (R$)" className="p-3 border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400" required {...register("preco")} />
 
-                <button type="submit" className="p-3 text-white bg-emerald-700 rounded-lg hover:bg-emerald-800">
-                    Cadastrar
-                </button>
-            </form>
+                    <Button type="submit" className="mt-2">
+                        Cadastrar
+                    </Button>
+                </form>
+            </Card>
         </div>
     )
 }

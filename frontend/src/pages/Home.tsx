@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import { ImovelCard } from "../components/ImovelCard"
+import { Button } from "../components/ui/Button"
 import type { ImovelType, InsightIA } from "../utils/types"
 
 const apiUrl = import.meta.env.VITE_API_URL
@@ -66,58 +67,62 @@ export default function Home() {
 
     return (
         <>
-            <h1 className="mb-4 text-3xl md:text-5xl font-extrabold text-gray-900">
-                Encontre o imóvel <span className="text-emerald-700">certo pra você</span>
-            </h1>
+            <div className="mb-8 pt-4">
+                <h1 className="mb-3 text-4xl md:text-6xl font-display font-semibold text-brand-900 leading-tight">
+                    Encontre o imóvel <span className="text-accent-500">certo pra você</span>
+                </h1>
+                <p className="text-gray-500 text-lg">Aluguel de imóveis com praticidade, do anúncio até a chave na mão.</p>
+            </div>
 
             {insight?.imovel && insight.insightIA && (
-                <div className="mb-6 p-4 bg-sky-50 border border-sky-200 rounded-lg">
-                    <p className="text-xs font-semibold text-sky-700 mb-1 uppercase tracking-wide">
+                <div className="mb-8 p-5 bg-accent-50 border border-accent-200 rounded-2xl">
+                    <p className="text-xs font-semibold text-accent-700 mb-1.5 uppercase tracking-wide">
                         ✨ Dado obtido por consulta a uma IA — sobre {insight.imovel.titulo}
                     </p>
                     {insight.insightIA.disponivel ? (
-                        <p className="text-sky-900 text-sm">{insight.insightIA.texto}</p>
+                        <p className="text-accent-900 text-sm leading-relaxed">{insight.insightIA.texto}</p>
                     ) : (
-                        <p className="text-sky-700 text-sm italic">
+                        <p className="text-accent-700 text-sm italic">
                             Insight indisponível no momento ({insight.insightIA.motivo}).
                         </p>
                     )}
-                    <Link to={`/imovel/${insight.imovel.id}`} className="text-sm text-sky-700 underline mt-1 inline-block">
+                    <Link to={`/imovel/${insight.imovel.id}`} className="text-sm text-accent-700 font-medium underline mt-2 inline-block">
                         Ver imóvel
                     </Link>
                 </div>
             )}
 
-            <div className="flex flex-wrap gap-3 mb-6">
+            <div className="flex flex-wrap gap-3 mb-8">
                 <form className="flex-1 min-w-64" onSubmit={handleSubmit(enviaPesquisa)}>
-                    <div className="flex">
+                    <div className="flex bg-white rounded-full shadow-sm border border-cream-200 overflow-hidden">
                         <input
                             type="search"
                             placeholder="Buscar por título, cidade ou descrição"
-                            className="flex-1 p-3 text-sm border border-gray-300 rounded-l-lg focus:ring-emerald-500 focus:border-emerald-500"
+                            className="flex-1 px-5 py-3 text-sm outline-none"
                             {...register("termo")}
                         />
                         <button
                             type="submit"
-                            className="px-4 py-2 text-white bg-emerald-700 rounded-r-lg hover:bg-emerald-800"
+                            className="px-5 py-3 text-sm font-medium text-white bg-brand-700 hover:bg-brand-800 transition-colors"
                         >
                             Pesquisar
                         </button>
                     </div>
                 </form>
-                <button
+                <Button
                     type="button"
+                    variant={somenteDestaques ? "outline" : "accent"}
+                    className="rounded-full"
                     onClick={somenteDestaques ? mostraTodos : mostraDestaques}
-                    className="px-4 py-2 text-white bg-amber-600 rounded-lg hover:bg-amber-700"
                 >
-                    {somenteDestaques ? "Ver todos" : "Exibir destaques"}
-                </button>
+                    {somenteDestaques ? "Ver todos" : "✨ Exibir destaques"}
+                </Button>
             </div>
 
             {imoveis.length === 0 ? (
-                <p className="text-gray-500">Nenhum imóvel encontrado.</p>
+                <p className="text-gray-400 text-center py-12">Nenhum imóvel encontrado.</p>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                     {imoveis.map(imovel => (
                         <ImovelCard data={imovel} key={imovel.id} />
                     ))}

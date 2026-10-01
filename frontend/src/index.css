@@ -1,6 +1,43 @@
 @import "tailwindcss";
 
+@theme {
+    --font-display: "Fraunces", serif;
+    --font-sans: "Inter", system-ui, sans-serif;
+
+    /* Verde-floresta: cor primária da marca (navbar, botões, links) */
+    --color-brand-50: #f2f6f0;
+    --color-brand-100: #dfe9d9;
+    --color-brand-200: #bdd3b1;
+    --color-brand-300: #93b680;
+    --color-brand-400: #6c9a57;
+    --color-brand-500: #4f7d3e;
+    --color-brand-600: #3c6530;
+    --color-brand-700: #2f5126;
+    --color-brand-800: #26401f;
+    --color-brand-900: #1d311a;
+
+    /* Terracota quente: cor de apoio (IA, destaques, acentos) */
+    --color-accent-50: #fdf3ec;
+    --color-accent-100: #fae0cc;
+    --color-accent-200: #f3bd93;
+    --color-accent-300: #ea9a60;
+    --color-accent-400: #dd7f3f;
+    --color-accent-500: #c7652a;
+    --color-accent-600: #a84f20;
+    --color-accent-700: #853e1b;
+
+    /* Creme: fundo da marca */
+    --color-cream-50: #fdfbf6;
+    --color-cream-100: #faf5ea;
+    --color-cream-200: #f3ead6;
+}
+
 body {
-    background-color: #f9fafb;
-    color: #111827;
+    background-color: var(--color-cream-50);
+    color: #2b2620;
+    font-family: var(--font-sans);
+}
+
+h1, h2, h3 {
+    font-family: var(--font-display);
 }

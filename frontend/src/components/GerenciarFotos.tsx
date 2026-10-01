@@ -3,6 +3,7 @@ import { toast } from "sonner"
 import type { ImagemType } from "../utils/types"
 import { obterClienteToken } from "../utils/auth"
 import { resolverUrlImagem } from "../utils/imagem"
+import { Button } from "./ui/Button"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -89,15 +90,15 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
     return (
         <div>
             {imagens.length > 0 && (
-                <div className="flex flex-wrap gap-3 mb-3">
+                <div className="flex flex-wrap gap-3 mb-4">
                     {imagens.map(img => (
                         <div key={img.id} className="relative w-24 h-24">
                             <img
                                 src={resolverUrlImagem(img.url)}
                                 alt=""
-                                className={`w-full h-full object-cover rounded-lg border-2 ${img.capa ? "border-emerald-600" : "border-transparent"}`}
+                                className={`w-full h-full object-cover rounded-xl border-2 ${img.capa ? "border-brand-600" : "border-transparent"}`}
                             />
-                            <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-black/50 rounded-b-lg py-1">
+                            <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1.5 bg-black/55 rounded-b-xl py-1">
                                 {!img.capa && (
                                     <button
                                         onClick={() => definirCapa(img.id)}
@@ -119,9 +120,9 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
                 </div>
             )}
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
                 <div>
-                    <label className="block text-sm text-gray-600 mb-1">Enviar do computador</label>
+                    <label className="block text-sm text-gray-500 mb-1">Enviar do computador</label>
                     <input
                         ref={inputArquivoRef}
                         type="file"
@@ -131,26 +132,22 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
                         disabled={enviandoFotos}
                         className="text-sm"
                     />
-                    {enviandoFotos && <p className="text-sm text-gray-500 mt-1">Enviando...</p>}
+                    {enviandoFotos && <p className="text-sm text-gray-400 mt-1">Enviando...</p>}
                 </div>
 
                 <div>
-                    <label className="block text-sm text-gray-600 mb-1">Ou colar o link de uma foto já hospedada</label>
+                    <label className="block text-sm text-gray-500 mb-1">Ou colar o link de uma foto já hospedada</label>
                     <div className="flex gap-2">
                         <input
                             type="url"
                             placeholder="https://..."
                             value={urlFoto}
                             onChange={e => setUrlFoto(e.target.value)}
-                            className="flex-1 p-2 text-sm border border-gray-300 rounded-lg"
+                            className="flex-1 p-2.5 text-sm border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400"
                         />
-                        <button
-                            type="button"
-                            onClick={anexarPorUrl}
-                            className="px-3 py-2 text-sm text-white bg-gray-700 rounded-lg hover:bg-gray-800"
-                        >
+                        <Button type="button" variant="outline" onClick={anexarPorUrl} className="px-4 py-2 text-sm">
                             Anexar
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

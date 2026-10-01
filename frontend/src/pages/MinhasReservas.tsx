@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react"
 import { Navigate } from "react-router-dom"
 import { toast } from "sonner"
-import type { ReservaType } from "../utils/types"
+import type { ReservaType, StatusReserva } from "../utils/types"
 import { obterClienteToken } from "../utils/auth"
+import { Button } from "../components/ui/Button"
+import { Card } from "../components/ui/Card"
+import { Badge } from "../components/ui/Badge"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
-const statusCor: Record<string, string> = {
-    PENDENTE: "bg-amber-100 text-amber-800",
-    CONFIRMADA: "bg-emerald-100 text-emerald-800",
-    CANCELADA: "bg-red-100 text-red-800"
+const statusTom: Record<StatusReserva, "amber" | "brand" | "red"> = {
+    PENDENTE: "amber",
+    CONFIRMADA: "brand",
+    CANCELADA: "red"
 }
 
 export default function MinhasReservas() {
@@ -59,24 +62,22 @@ export default function MinhasReservas() {
 
     return (
         <div className="max-w-3xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Minhas reservas</h1>
+            <h1 className="text-3xl font-display font-semibold text-brand-900 mb-6">Minhas reservas</h1>
 
             {reservas.length === 0 ? (
-                <p className="text-gray-500">Você ainda não fez nenhuma reserva.</p>
+                <p className="text-gray-400 text-center py-12">Você ainda não fez nenhuma reserva.</p>
             ) : (
                 <div className="flex flex-col gap-4">
                     {reservas.map(reserva => (
-                        <div key={reserva.id} className="p-4 bg-white border border-gray-200 rounded-lg">
+                        <Card key={reserva.id}>
                             <div className="flex justify-between items-start mb-2">
                                 <div>
-                                    <p className="font-bold text-gray-900">{reserva.imovel?.titulo}</p>
-                                    <p className="text-sm text-gray-600">{reserva.imovel?.cidade}</p>
+                                    <p className="font-display font-semibold text-lg text-gray-900">{reserva.imovel?.titulo}</p>
+                                    <p className="text-sm text-gray-500">{reserva.imovel?.cidade}</p>
                                 </div>
-                                <span className={`text-xs font-semibold px-2 py-1 rounded ${statusCor[reserva.status]}`}>
-                                    {reserva.status}
-                                </span>
+                                <Badge tone={statusTom[reserva.status]}>{reserva.status}</Badge>
                             </div>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-500">
                                 {new Date(reserva.dataInicio).toLocaleDateString("pt-br")} até {new Date(reserva.dataFim).toLocaleDateString("pt-br")}
                             </p>
                             <p className="text-sm text-gray-800 font-semibold">
@@ -84,19 +85,19 @@ export default function MinhasReservas() {
                             </p>
 
                             {reserva.respostaAdmin && (
-                                <div className="mt-2 p-2 bg-emerald-50 border border-emerald-200 rounded text-sm text-emerald-800">
+                                <div className="mt-3 p-3 bg-brand-50 border border-brand-100 rounded-xl text-sm text-brand-800">
                                     <strong>Resposta:</strong> {reserva.respostaAdmin}
                                 </div>
                             )}
 
                             {reserva.nota ? (
-                                <p className="mt-2 text-sm text-amber-600">Sua avaliação: ★ {reserva.nota} — {reserva.avaliacao}</p>
+                                <p className="mt-3 text-sm text-accent-600">Sua avaliação: ★ {reserva.nota} — {reserva.avaliacao}</p>
                             ) : avaliando === reserva.id ? (
                                 <div className="mt-3 flex flex-col gap-2">
                                     <select
                                         value={nota}
                                         onChange={e => setNota(Number(e.target.value))}
-                                        className="p-2 border border-gray-300 rounded-lg w-24"
+                                        className="p-2 border border-cream-200 bg-cream-50 rounded-xl w-24"
                                     >
                                         {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>★ {n}</option>)}
                                     </select>
@@ -104,24 +105,21 @@ export default function MinhasReservas() {
                                         placeholder="Comentário"
                                         value={comentario}
                                         onChange={e => setComentario(e.target.value)}
-                                        className="p-2 border border-gray-300 rounded-lg"
+                                        className="p-2 border border-cream-200 bg-cream-50 rounded-xl"
                                     />
-                                    <button
-                                        onClick={() => enviarAvaliacao(reserva.id)}
-                                        className="self-start px-3 py-2 text-sm text-white bg-emerald-700 rounded-lg hover:bg-emerald-800"
-                                    >
+                                    <Button onClick={() => enviarAvaliacao(reserva.id)} className="self-start text-sm px-3 py-2">
                                         Enviar avaliação
-                                    </button>
+                                    </Button>
                                 </div>
                             ) : (
                                 <button
                                     onClick={() => setAvaliando(reserva.id)}
-                                    className="mt-2 text-sm text-emerald-700 underline"
+                                    className="mt-3 text-sm text-accent-600 font-medium underline"
                                 >
                                     Avaliar
                                 </button>
                             )}
-                        </div>
+                        </Card>
                     ))}
                 </div>
             )}

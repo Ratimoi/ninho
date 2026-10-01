@@ -2,13 +2,16 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import type { ReservaType, StatusReserva } from "../../utils/types"
 import { obterAdminToken } from "../../utils/auth"
+import { Button } from "../../components/ui/Button"
+import { Card } from "../../components/ui/Card"
+import { Badge } from "../../components/ui/Badge"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
-const statusCor: Record<StatusReserva, string> = {
-    PENDENTE: "bg-amber-100 text-amber-800",
-    CONFIRMADA: "bg-emerald-100 text-emerald-800",
-    CANCELADA: "bg-red-100 text-red-800"
+const statusTom: Record<StatusReserva, "amber" | "brand" | "red"> = {
+    PENDENTE: "amber",
+    CONFIRMADA: "brand",
+    CANCELADA: "red"
 }
 
 export default function ReservasAdmin() {
@@ -87,24 +90,22 @@ export default function ReservasAdmin() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Interações dos clientes</h1>
+            <h1 className="text-2xl font-display font-semibold text-brand-900 mb-4">Interações dos clientes</h1>
             <div className="flex flex-col gap-4">
                 {reservas.map(reserva => (
-                    <div key={reserva.id} className="p-4 bg-white border border-gray-200 rounded-lg">
+                    <Card key={reserva.id}>
                         <div className="flex justify-between items-start mb-2">
                             <div>
-                                <p className="font-bold text-gray-900">{reserva.imovel?.titulo}</p>
-                                <p className="text-sm text-gray-600">
+                                <p className="font-display font-semibold text-gray-900">{reserva.imovel?.titulo}</p>
+                                <p className="text-sm text-gray-500">
                                     Cliente: {reserva.cliente?.nome} ({reserva.cliente?.email})
                                 </p>
                             </div>
-                            <span className={`text-xs font-semibold px-2 py-1 rounded ${statusCor[reserva.status]}`}>
-                                {reserva.status}
-                            </span>
+                            <Badge tone={statusTom[reserva.status]}>{reserva.status}</Badge>
                         </div>
 
                         {reserva.avaliacao && (
-                            <p className="text-sm text-amber-700 mb-2">★ {reserva.nota} — {reserva.avaliacao}</p>
+                            <p className="text-sm text-accent-600 mb-2">★ {reserva.nota} — {reserva.avaliacao}</p>
                         )}
 
                         <div className="flex gap-2 mb-3">
@@ -113,7 +114,7 @@ export default function ReservasAdmin() {
                                     key={status}
                                     onClick={() => mudarStatus(reserva.id, status)}
                                     disabled={reserva.status === status}
-                                    className="px-2 py-1 text-xs rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50"
+                                    className="px-2.5 py-1 text-xs rounded-lg border border-cream-200 disabled:opacity-40 hover:bg-cream-100"
                                 >
                                     {status}
                                 </button>
@@ -124,24 +125,21 @@ export default function ReservasAdmin() {
                         </div>
 
                         {reserva.respostaAdmin ? (
-                            <p className="text-sm text-emerald-700">Resposta enviada: {reserva.respostaAdmin}</p>
+                            <p className="text-sm text-brand-700">Resposta enviada: {reserva.respostaAdmin}</p>
                         ) : (
                             <div className="flex gap-2">
                                 <input
                                     placeholder="Responder ao cliente..."
                                     value={resposta[reserva.id] ?? ""}
                                     onChange={e => setResposta({ ...resposta, [reserva.id]: e.target.value })}
-                                    className="flex-1 p-2 text-sm border border-gray-300 rounded-lg"
+                                    className="flex-1 p-2.5 text-sm border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400"
                                 />
-                                <button
-                                    onClick={() => responder(reserva.id)}
-                                    className="px-3 py-2 text-sm text-white bg-gray-900 rounded-lg hover:bg-gray-800"
-                                >
+                                <Button onClick={() => responder(reserva.id)} className="text-sm px-3 py-2">
                                     Enviar
-                                </button>
+                                </Button>
                             </div>
                         )}
-                    </div>
+                    </Card>
                 ))}
             </div>
         </div>

@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom"
 import { obterCliente, limparCliente } from "../utils/auth"
+import { Logo } from "./ui/Logo"
 
 export function Navbar() {
     const navigate = useNavigate()
@@ -11,37 +12,47 @@ export function Navbar() {
     }
 
     return (
-        <nav className="border-b border-emerald-800 bg-emerald-700">
-            <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-                <Link to="/" className="text-2xl font-semibold text-white">
-                    🪺 Ninho
+        <nav className="bg-brand-700 shadow-sm">
+            <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto px-4 py-3">
+                <Link to="/">
+                    <Logo />
                 </Link>
-                <ul className="flex items-center gap-4 text-white">
+                <ul className="flex items-center gap-5 text-brand-50 text-sm">
                     {cliente ? (
                         <>
-                            <li className="text-sm">Olá, {cliente.nome}</li>
+                            <li className="hidden sm:inline text-brand-200">Olá, {cliente.nome}</li>
                             <li>
-                                <Link to="/minhas-reservas" className="hover:underline">Minhas reservas</Link>
+                                <Link to="/minhas-reservas" className="hover:text-white transition-colors">Minhas reservas</Link>
                             </li>
                             <li>
-                                <Link to="/imovel/novo" className="hover:underline">Anunciar imóvel</Link>
+                                <Link
+                                    to="/imovel/novo"
+                                    className="bg-accent-500 hover:bg-accent-600 text-white px-3 py-1.5 rounded-full font-medium transition-colors"
+                                >
+                                    Anunciar imóvel
+                                </Link>
                             </li>
                             <li>
-                                <button onClick={sair} className="hover:underline cursor-pointer">Sair</button>
+                                <button onClick={sair} className="hover:text-white transition-colors cursor-pointer">Sair</button>
                             </li>
                         </>
                     ) : (
                         <>
                             <li>
-                                <Link to="/login" className="hover:underline">Entrar</Link>
+                                <Link to="/login" className="hover:text-white transition-colors">Entrar</Link>
                             </li>
                             <li>
-                                <Link to="/cadastro" className="hover:underline">Cadastrar</Link>
+                                <Link
+                                    to="/cadastro"
+                                    className="bg-accent-500 hover:bg-accent-600 text-white px-3 py-1.5 rounded-full font-medium transition-colors"
+                                >
+                                    Cadastrar
+                                </Link>
                             </li>
                         </>
                     )}
                     <li>
-                        <Link to="/admin/login" className="text-emerald-200 text-sm hover:underline">Área admin</Link>
+                        <Link to="/admin/login" className="text-brand-300 hover:text-brand-100 transition-colors">Área admin</Link>
                     </li>
                 </ul>
             </div>
