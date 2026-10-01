@@ -19,6 +19,10 @@ const imovelSchema = z.object({
     quartos: z.number().int().positive()
 })
 
+const urlImagemSchema = z.object({
+    url: z.url()
+})
+
 const sugestaoSchema = z.object({
     titulo: z.string().min(3),
     cidade: z.string().min(2),
@@ -267,6 +271,39 @@ router.post("/:id/imagens", autenticarQualquer, upload.array("imagens", 10), asy
     }
 })
 
+// Alternativa ao upload de arquivo: anexar uma foto já hospedada em outro
+// lugar (ex: imgur, Supabase Storage) colando o link. Também contorna a
+// limitação do disco efêmero do Render com uploads de arquivo.
+router.post("/:id/imagens/url", autenticarQualquer, async (req, res) => {
+    const id = Number(req.params.id)
+
+    const valida = urlImagemSchema.safeParse(req.body)
+    if (!valida.success) {
+        res.status(400).json({ erro: valida.error })
+        return
+    }
+
+    try {
+        const imovel = await verificarDono(req, res, id)
+        if (!imovel) return
+
+        const totalAtual = await prisma.imovelImagem.count({ where: { imovelId: id } })
+
+        const criada = await prisma.imovelImagem.create({
+            data: {
+                imovelId: id,
+                url: valida.data.url,
+                ordem: totalAtual,
+                capa: totalAtual === 0
+            }
+        })
+
+        res.status(201).json(criada)
+    } catch (error) {
+        tratarErroPrisma(error, res)
+    }
+})
+
 router.patch("/:id/imagens/:imagemId/capa", autenticarQualquer, async (req, res) => {
     const id = Number(req.params.id)
     const imagemId = Number(req.params.imagemId)
@@ -302,8 +339,12 @@ router.delete("/:id/imagens/:imagemId", autenticarQualquer, async (req, res) => 
 
         await prisma.imovelImagem.delete({ where: { id: imagemId } })
 
-        const caminhoArquivo = path.join(pastaUploads, path.basename(imagem.url))
-        fs.unlink(caminhoArquivo, () => {})
+        // Só existe arquivo local pra apagar se a imagem veio de upload
+        // (/uploads/...); imagens anexadas por URL externa não têm o quê excluir aqui.
+        if (imagem.url.startsWith("/uploads/")) {
+            const caminhoArquivo = path.join(pastaUploads, path.basename(imagem.url))
+            fs.unlink(caminhoArquivo, () => {})
+        }
 
         res.status(204).send()
     } catch (error) {
@@ -326,6 +367,17 @@ router.delete("/:id", autenticarQualquer, async (req, res) => {
         if (!ehDono && !ehAdmin) {
             res.status(403).json({ erro: "Sem permissão para excluir este imóvel" })
             return
+        }
+
+        // Fotos não devem impedir a exclusão do imóvel (diferente de reservas,
+        // que representam histórico real e continuam bloqueando). Apaga as
+        // fotos primeiro, inclusive os arquivos locais das que foram upload.
+        const imagens = await prisma.imovelImagem.findMany({ where: { imovelId: id } })
+        await prisma.imovelImagem.deleteMany({ where: { imovelId: id } })
+        for (const imagem of imagens) {
+            if (imagem.url.startsWith("/uploads/")) {
+                fs.unlink(path.join(pastaUploads, path.basename(imagem.url)), () => {})
+            }
         }
 
         await prisma.imovel.delete({ where: { id } })

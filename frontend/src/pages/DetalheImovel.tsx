@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useParams, Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import type { ImovelType } from "../utils/types"
 import { obterCliente, obterClienteToken } from "../utils/auth"
 import { resolverUrlImagem } from "../utils/imagem"
+import { GerenciarFotos } from "../components/GerenciarFotos"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -16,8 +17,6 @@ type Inputs = {
 export default function DetalheImovel() {
     const params = useParams()
     const [imovel, setImovel] = useState<ImovelType>()
-    const [enviandoFotos, setEnviandoFotos] = useState(false)
-    const inputArquivoRef = useRef<HTMLInputElement>(null)
     const cliente = obterCliente()
     const { register, handleSubmit, reset } = useForm<Inputs>()
 
@@ -60,54 +59,6 @@ export default function DetalheImovel() {
 
         toast.success("Reserva enviada! Acompanhe em 'Minhas reservas'.")
         reset()
-    }
-
-    async function enviarFotos(arquivos: FileList | null) {
-        const token = obterClienteToken()
-        if (!token || !imovel || !arquivos || arquivos.length === 0) return
-
-        const formData = new FormData()
-        Array.from(arquivos).forEach(arquivo => formData.append("imagens", arquivo))
-
-        setEnviandoFotos(true)
-        const response = await fetch(`${apiUrl}/imovel/${imovel.id}/imagens`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-            body: formData
-        })
-        setEnviandoFotos(false)
-
-        if (!response.ok) {
-            toast.error("Não foi possível enviar as fotos")
-            return
-        }
-
-        if (inputArquivoRef.current) inputArquivoRef.current.value = ""
-        toast.success("Fotos enviadas!")
-        buscarImovel()
-    }
-
-    async function definirCapa(imagemId: number) {
-        const token = obterClienteToken()
-        if (!token || !imovel) return
-
-        await fetch(`${apiUrl}/imovel/${imovel.id}/imagens/${imagemId}/capa`, {
-            method: "PATCH",
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        buscarImovel()
-    }
-
-    async function excluirFoto(imagemId: number) {
-        const token = obterClienteToken()
-        if (!token || !imovel) return
-        if (!confirm("Excluir esta foto?")) return
-
-        await fetch(`${apiUrl}/imovel/${imovel.id}/imagens/${imagemId}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        buscarImovel()
     }
 
     if (!imovel) {
@@ -153,48 +104,7 @@ export default function DetalheImovel() {
             {ehDono && (
                 <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
                     <h2 className="text-lg font-bold text-gray-900 mb-3">Gerenciar fotos</h2>
-
-                    {imovel.imagens.length > 0 && (
-                        <div className="flex flex-wrap gap-3 mb-3">
-                            {imovel.imagens.map(img => (
-                                <div key={img.id} className="relative w-24 h-24">
-                                    <img
-                                        src={resolverUrlImagem(img.url)}
-                                        alt=""
-                                        className={`w-full h-full object-cover rounded-lg border-2 ${img.capa ? "border-emerald-600" : "border-transparent"}`}
-                                    />
-                                    <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-black/50 rounded-b-lg py-1">
-                                        {!img.capa && (
-                                            <button
-                                                onClick={() => definirCapa(img.id)}
-                                                className="text-[10px] text-white hover:underline"
-                                                title="Definir como capa"
-                                            >
-                                                Capa
-                                            </button>
-                                        )}
-                                        <button
-                                            onClick={() => excluirFoto(img.id)}
-                                            className="text-[10px] text-red-300 hover:underline"
-                                        >
-                                            Excluir
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    <input
-                        ref={inputArquivoRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={e => enviarFotos(e.target.files)}
-                        disabled={enviandoFotos}
-                        className="text-sm"
-                    />
-                    {enviandoFotos && <p className="text-sm text-gray-500 mt-1">Enviando...</p>}
+                    <GerenciarFotos imovelId={imovel.id} imagens={imovel.imagens} onAtualizar={buscarImovel} />
                 </div>
             )}
 

@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form"
 import { Navigate, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { obterClienteToken } from "../utils/auth"
+import { GerenciarFotos } from "../components/GerenciarFotos"
+import type { ImagemType } from "../utils/types"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -20,6 +22,7 @@ export default function NovoImovel() {
     const { register, handleSubmit, watch, setValue } = useForm<Inputs>()
     const navigate = useNavigate()
     const [gerandoIA, setGerandoIA] = useState(false)
+    const [imovelCriado, setImovelCriado] = useState<{ id: number, imagens: ImagemType[] }>()
 
     async function gerarComIA() {
         if (!token) return
@@ -68,12 +71,37 @@ export default function NovoImovel() {
             return
         }
 
-        toast.success("Imóvel cadastrado!")
-        navigate(`/imovel/${resultado.id}`)
+        toast.success("Imóvel cadastrado! Agora adicione algumas fotos.")
+        setImovelCriado({ id: resultado.id, imagens: [] })
+    }
+
+    async function atualizarImagens() {
+        if (!imovelCriado) return
+        const response = await fetch(`${apiUrl}/imovel/${imovelCriado.id}`)
+        const dados = await response.json()
+        setImovelCriado({ id: imovelCriado.id, imagens: dados.imagens })
     }
 
     if (!token) {
         return <Navigate to="/login" replace />
+    }
+
+    if (imovelCriado) {
+        return (
+            <div className="max-w-lg mx-auto">
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">Adicionar fotos</h1>
+                <p className="text-sm text-gray-600 mb-4">
+                    Opcional, mas imóveis com fotos recebem muito mais interesse. Dá pra adicionar mais depois também.
+                </p>
+                <GerenciarFotos imovelId={imovelCriado.id} imagens={imovelCriado.imagens} onAtualizar={atualizarImagens} />
+                <button
+                    onClick={() => navigate(`/imovel/${imovelCriado.id}`)}
+                    className="w-full mt-4 p-3 text-white bg-emerald-700 rounded-lg hover:bg-emerald-800"
+                >
+                    Concluir e ver anúncio
+                </button>
+            </div>
+        )
     }
 
     return (
