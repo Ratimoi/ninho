@@ -37,7 +37,8 @@ router.get("/minhas", autenticarCliente, async (req, res) => {
         })
         res.status(200).json(reservas)
     } catch (error) {
-        res.status(500).json({ erro: error })
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível carregar as reservas" })
     }
 })
 
@@ -53,7 +54,8 @@ router.get("/", autenticarAdmin, async (req, res) => {
         })
         res.status(200).json(reservas)
     } catch (error) {
-        res.status(500).json({ erro: error })
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível carregar as interações" })
     }
 })
 

@@ -3,10 +3,15 @@ import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import { Request, Response, NextFunction } from "express"
 
-const JWT_SECRET = process.env.JWT_SECRET || "segredo-inseguro-dev"
+// Sem fallback inseguro: se faltar, o servidor nem deve subir — rodar com um
+// segredo previsível tornaria qualquer token forjável.
+if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET não configurado")
+}
+const JWT_SECRET: string = process.env.JWT_SECRET
 
 export async function hashSenha(senha: string) {
-    return bcrypt.hash(senha, 10)
+    return bcrypt.hash(senha, 12)
 }
 
 export async function compararSenha(senha: string, hash: string) {

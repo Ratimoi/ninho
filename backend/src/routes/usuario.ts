@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from "../../lib/prisma"
 import { hashSenha, compararSenha, gerarToken, autenticarCliente } from "../../lib/auth"
 import { tratarErroPrisma } from "../../lib/erros"
+import { limiteAutenticacao } from "../../lib/rateLimit"
 
 const router = Router()
 
@@ -19,7 +20,7 @@ const loginSchema = z.object({
 
 const semSenha = { id: true, nome: true, email: true }
 
-router.post("/cadastro", async (req, res) => {
+router.post("/cadastro", limiteAutenticacao, async (req, res) => {
     const valida = usuarioSchema.safeParse(req.body)
     if (!valida.success) {
         res.status(400).json({ erro: valida.error })
@@ -43,7 +44,7 @@ router.post("/cadastro", async (req, res) => {
     }
 })
 
-router.post("/login", async (req, res) => {
+router.post("/login", limiteAutenticacao, async (req, res) => {
     const valida = loginSchema.safeParse(req.body)
     if (!valida.success) {
         res.status(400).json({ erro: valida.error })
@@ -66,7 +67,8 @@ router.post("/login", async (req, res) => {
             usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email }
         })
     } catch (error) {
-        res.status(500).json({ erro: error })
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível completar o login" })
     }
 })
 
@@ -84,7 +86,8 @@ router.get("/me", autenticarCliente, async (req, res) => {
 
         res.status(200).json(usuario)
     } catch (error) {
-        res.status(500).json({ erro: error })
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível carregar os dados do usuário" })
     }
 })
 

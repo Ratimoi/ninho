@@ -29,7 +29,8 @@ router.get("/", autenticarAdmin, async (req, res) => {
             imoveisPorCidade: cidades.map(c => ({ cidade: c.cidade, total: c._count._all }))
         })
     } catch (error) {
-        res.status(500).json({ erro: error })
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível carregar o dashboard" })
     }
 })
 

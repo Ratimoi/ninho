@@ -71,7 +71,8 @@ router.get("/", async (req, res) => {
 
         res.status(200).json(resultado)
     } catch (error) {
-        res.status(500).json({ erro: error })
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível carregar os imóveis" })
     }
 })
 
@@ -102,7 +103,8 @@ router.get("/insight-destaque", async (req, res) => {
             insightIA
         })
     } catch (error) {
-        res.status(500).json({ erro: error })
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível carregar o insight" })
     }
 })
 
@@ -138,7 +140,8 @@ router.get("/:id", async (req, res) => {
 
         res.status(200).json({ ...imovel, insightIA })
     } catch (error) {
-        res.status(500).json({ erro: error })
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível carregar o imóvel" })
     }
 })
 
@@ -168,7 +171,8 @@ router.post("/", autenticarCliente, async (req, res) => {
         })
         res.status(201).json(imovel)
     } catch (error) {
-        res.status(400).json({ erro: error })
+        console.error(error)
+        res.status(400).json({ erro: "Não foi possível cadastrar o imóvel" })
     }
 })
 

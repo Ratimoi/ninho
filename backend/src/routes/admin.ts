@@ -2,6 +2,7 @@ import { Router } from "express"
 import { z } from 'zod'
 import { prisma } from "../../lib/prisma"
 import { hashSenha, compararSenha, gerarToken, autenticarAdmin } from "../../lib/auth"
+import { limiteAutenticacao } from "../../lib/rateLimit"
 
 const router = Router()
 
@@ -20,7 +21,7 @@ const semSenha = { id: true, nome: true, email: true }
 
 // Só é pública enquanto não existe nenhum admin (bootstrap do sistema).
 // Depois do primeiro, criar outro admin exige estar logado como admin.
-router.post("/cadastro", async (req, res) => {
+router.post("/cadastro", limiteAutenticacao, async (req, res) => {
     const valida = adminSchema.safeParse(req.body)
     if (!valida.success) {
         res.status(400).json({ erro: valida.error })
@@ -50,11 +51,12 @@ async function criarAdmin(req: any, res: any, { nome, email, senha }: { nome: st
             res.status(409).json({ erro: "Já existe um admin com este email" })
             return
         }
-        res.status(400).json({ erro: error })
+        console.error(error)
+        res.status(400).json({ erro: "Não foi possível criar o admin" })
     }
 }
 
-router.post("/login", async (req, res) => {
+router.post("/login", limiteAutenticacao, async (req, res) => {
     const valida = loginSchema.safeParse(req.body)
     if (!valida.success) {
         res.status(400).json({ erro: valida.error })
@@ -77,7 +79,8 @@ router.post("/login", async (req, res) => {
             admin: { id: admin.id, nome: admin.nome, email: admin.email }
         })
     } catch (error) {
-        res.status(500).json({ erro: error })
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível completar o login" })
     }
 })
 
@@ -95,7 +98,8 @@ router.get("/me", autenticarAdmin, async (req, res) => {
 
         res.status(200).json(admin)
     } catch (error) {
-        res.status(500).json({ erro: error })
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível carregar os dados do admin" })
     }
 })
 
