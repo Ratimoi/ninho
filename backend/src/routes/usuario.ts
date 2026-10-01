@@ -278,6 +278,7 @@ router.put("/me", autenticarCliente, async (req, res) => {
 router.delete("/me", autenticarCliente, async (req, res) => {
     try {
         await prisma.usuario.delete({ where: { id: req.usuario!.id } })
+        limparCookieAuth(res, "cliente")
         res.status(204).send()
     } catch (error) {
         tratarErroPrisma(error, res, { emUso: "Não é possível excluir a conta: você ainda tem imóveis ou reservas cadastrados" })

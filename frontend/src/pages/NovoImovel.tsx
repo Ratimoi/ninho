@@ -3,10 +3,8 @@ import { useForm } from "react-hook-form"
 import { Navigate, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { obterCliente } from "../utils/auth"
-import { GerenciarFotos } from "../components/GerenciarFotos"
 import { Button } from "../components/ui/Button"
 import { Card } from "../components/ui/Card"
-import type { ImagemType } from "../utils/types"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -24,7 +22,10 @@ export default function NovoImovel() {
     const { register, handleSubmit, watch, setValue } = useForm<Inputs>()
     const navigate = useNavigate()
     const [gerandoIA, setGerandoIA] = useState(false)
-    const [imovelCriado, setImovelCriado] = useState<{ id: number, imagens: ImagemType[] }>()
+    const [cadastrando, setCadastrando] = useState(false)
+    const [arquivos, setArquivos] = useState<File[]>([])
+    const [urlFoto, setUrlFoto] = useState("")
+    const [urls, setUrls] = useState<string[]>([])
 
     async function gerarComIA() {
         if (!cliente) return
@@ -55,8 +56,20 @@ export default function NovoImovel() {
         toast.success("Descrição e preço sugeridos pela IA — revise antes de publicar!")
     }
 
+    function adicionarUrl() {
+        if (!urlFoto.trim()) return
+        setUrls([...urls, urlFoto.trim()])
+        setUrlFoto("")
+    }
+
+    function removerUrl(index: number) {
+        setUrls(urls.filter((_, i) => i !== index))
+    }
+
     async function cadastrar(data: Inputs) {
         if (!cliente) return
+
+        setCadastrando(true)
 
         const response = await fetch(`${apiUrl}/imovel`, {
             method: "POST",
@@ -69,42 +82,48 @@ export default function NovoImovel() {
             })
         })
 
-        const resultado = await response.json()
         if (!response.ok) {
+            setCadastrando(false)
             toast.error("Não foi possível cadastrar o imóvel")
             return
         }
 
-        toast.success("Imóvel cadastrado! Agora adicione algumas fotos.")
-        setImovelCriado({ id: resultado.id, imagens: [] })
-    }
+        const imovel = await response.json()
 
-    async function atualizarImagens() {
-        if (!imovelCriado) return
-        const response = await fetch(`${apiUrl}/imovel/${imovelCriado.id}`)
-        const dados = await response.json()
-        setImovelCriado({ id: imovelCriado.id, imagens: dados.imagens })
+        if (arquivos.length > 0) {
+            const formData = new FormData()
+            arquivos.forEach(arquivo => formData.append("imagens", arquivo))
+
+            const respostaArquivos = await fetch(`${apiUrl}/imovel/${imovel.id}/imagens`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+                body: formData
+            })
+            if (!respostaArquivos.ok) {
+                toast.error("Imóvel cadastrado, mas não foi possível enviar as fotos selecionadas")
+            }
+        }
+
+        for (const url of urls) {
+            const respostaUrl = await fetch(`${apiUrl}/imovel/${imovel.id}/imagens/url`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ url })
+            })
+            if (!respostaUrl.ok) {
+                toast.error(`Não foi possível anexar a foto: ${url}`)
+            }
+        }
+
+        setCadastrando(false)
+        toast.success("Imóvel cadastrado!")
+        navigate(`/imovel/${imovel.id}`)
     }
 
     if (!cliente) {
         return <Navigate to="/login" replace />
-    }
-
-    if (imovelCriado) {
-        return (
-            <div className="max-w-lg mx-auto mt-6">
-                <Card className="p-8">
-                    <h1 className="text-2xl font-display font-semibold text-brand-900 mb-1">Adicionar fotos</h1>
-                    <p className="text-sm text-gray-500 mb-5">
-                        Opcional, mas imóveis com fotos recebem muito mais interesse. Dá pra adicionar mais depois também.
-                    </p>
-                    <GerenciarFotos imovelId={imovelCriado.id} imagens={imovelCriado.imagens} onAtualizar={atualizarImagens} />
-                    <Button onClick={() => navigate(`/imovel/${imovelCriado.id}`)} className="w-full mt-5">
-                        Concluir e ver anúncio
-                    </Button>
-                </Card>
-            </div>
-        )
     }
 
     return (
@@ -124,8 +143,54 @@ export default function NovoImovel() {
                     <textarea placeholder="Descrição" className="p-3 border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400" rows={4} {...register("descricao")} />
                     <input type="number" step="0.01" placeholder="Preço mensal (R$)" className="p-3 border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400" required {...register("preco")} />
 
-                    <Button type="submit" className="mt-2">
-                        Cadastrar
+                    <div className="border-t border-cream-200 pt-3 mt-1 flex flex-col gap-3">
+                        <p className="text-sm font-medium text-gray-700">Fotos (opcional)</p>
+
+                        <div>
+                            <label className="block text-sm text-gray-500 mb-1">Enviar do computador</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={e => setArquivos(e.target.files ? Array.from(e.target.files) : [])}
+                                className="text-sm"
+                            />
+                            {arquivos.length > 0 && (
+                                <p className="text-xs text-gray-500 mt-1">{arquivos.length} arquivo(s) selecionado(s)</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm text-gray-500 mb-1">Ou colar o link de uma foto já hospedada</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="url"
+                                    placeholder="https://..."
+                                    value={urlFoto}
+                                    onChange={e => setUrlFoto(e.target.value)}
+                                    className="flex-1 p-2.5 text-sm border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400"
+                                />
+                                <Button type="button" variant="outline" onClick={adicionarUrl} className="px-4 py-2 text-sm">
+                                    Adicionar
+                                </Button>
+                            </div>
+                            {urls.length > 0 && (
+                                <ul className="mt-2 flex flex-col gap-1">
+                                    {urls.map((url, i) => (
+                                        <li key={i} className="flex items-center justify-between gap-2 text-xs text-gray-500 bg-cream-50 rounded-lg px-2.5 py-1.5">
+                                            <span className="truncate">{url}</span>
+                                            <button type="button" onClick={() => removerUrl(i)} className="text-red-500 hover:underline shrink-0">
+                                                Remover
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    </div>
+
+                    <Button type="submit" className="mt-2" disabled={cadastrando}>
+                        {cadastrando ? "Cadastrando..." : "Cadastrar"}
                     </Button>
                 </form>
             </Card>

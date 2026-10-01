@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import { ImovelCard } from "../components/ImovelCard"
 import { Button } from "../components/ui/Button"
-import type { ImovelType, InsightIA } from "../utils/types"
+import type { ImovelType } from "../utils/types"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -12,15 +11,9 @@ type Inputs = {
     termo: string
 }
 
-type InsightDestaque = {
-    imovel: { id: number, titulo: string, cidade: string } | null
-    insightIA: InsightIA | null
-}
-
 export default function Home() {
     const [imoveis, setImoveis] = useState<ImovelType[]>([])
     const [somenteDestaques, setSomenteDestaques] = useState(false)
-    const [insight, setInsight] = useState<InsightDestaque>()
     const { register, handleSubmit, reset } = useForm<Inputs>()
 
     async function buscarImoveis(termo?: string, destaque?: boolean) {
@@ -36,12 +29,6 @@ export default function Home() {
 
     useEffect(() => {
         buscarImoveis()
-
-        async function buscarInsight() {
-            const response = await fetch(`${apiUrl}/imovel/insight-destaque`)
-            if (response.ok) setInsight(await response.json())
-        }
-        buscarInsight()
     }, [])
 
     async function enviaPesquisa(data: Inputs) {
@@ -73,24 +60,6 @@ export default function Home() {
                 </h1>
                 <p className="text-gray-500 text-lg">Aluguel de imóveis com praticidade, do anúncio até a chave na mão.</p>
             </div>
-
-            {insight?.imovel && insight.insightIA && (
-                <div className="mb-8 p-5 bg-accent-50 border border-accent-200 rounded-2xl">
-                    <p className="text-xs font-semibold text-accent-700 mb-1.5 uppercase tracking-wide">
-                        ✨ Dado obtido por consulta a uma IA — sobre {insight.imovel.titulo}
-                    </p>
-                    {insight.insightIA.disponivel ? (
-                        <p className="text-accent-900 text-sm leading-relaxed">{insight.insightIA.texto}</p>
-                    ) : (
-                        <p className="text-accent-700 text-sm italic">
-                            Insight indisponível no momento ({insight.insightIA.motivo}).
-                        </p>
-                    )}
-                    <Link to={`/imovel/${insight.imovel.id}`} className="text-sm text-accent-700 font-medium underline mt-2 inline-block">
-                        Ver imóvel
-                    </Link>
-                </div>
-            )}
 
             <div className="flex flex-wrap gap-3 mb-8">
                 <form className="flex-1 min-w-64" onSubmit={handleSubmit(enviaPesquisa)}>

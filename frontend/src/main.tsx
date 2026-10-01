@@ -13,6 +13,7 @@ import ConfirmarEmail from './pages/ConfirmarEmail.tsx'
 import DetalheImovel from './pages/DetalheImovel.tsx'
 import NovoImovel from './pages/NovoImovel.tsx'
 import MinhasReservas from './pages/MinhasReservas.tsx'
+import Perfil from './pages/Perfil.tsx'
 
 import AdminLogin from './pages/admin/AdminLogin.tsx'
 import AdminLayout from './pages/admin/AdminLayout.tsx'
@@ -34,6 +35,7 @@ const rotas = createBrowserRouter([
       { path: 'imovel/novo', element: <NovoImovel /> },
       { path: 'imovel/:imovelId', element: <DetalheImovel /> },
       { path: 'minhas-reservas', element: <MinhasReservas /> },
+      { path: 'perfil', element: <Perfil /> },
       { path: 'admin/login', element: <AdminLogin /> },
       {
         path: 'admin',

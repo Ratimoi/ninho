@@ -20,7 +20,9 @@ export function Navbar() {
                 <ul className="flex items-center gap-5 text-brand-50 text-sm">
                     {cliente ? (
                         <>
-                            <li className="hidden sm:inline text-brand-200">Olá, {cliente.nome}</li>
+                            <li className="hidden sm:inline">
+                                <Link to="/perfil" className="text-brand-200 hover:text-white transition-colors">Olá, {cliente.nome}</Link>
+                            </li>
                             <li>
                                 <Link to="/minhas-reservas" className="hover:text-white transition-colors">Minhas reservas</Link>
                             </li>
