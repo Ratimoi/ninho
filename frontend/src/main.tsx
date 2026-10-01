@@ -9,6 +9,7 @@ import Login from './pages/Login.tsx'
 import Cadastro from './pages/Cadastro.tsx'
 import EsqueciSenha from './pages/EsqueciSenha.tsx'
 import RedefinirSenha from './pages/RedefinirSenha.tsx'
+import ConfirmarEmail from './pages/ConfirmarEmail.tsx'
 import DetalheImovel from './pages/DetalheImovel.tsx'
 import NovoImovel from './pages/NovoImovel.tsx'
 import MinhasReservas from './pages/MinhasReservas.tsx'
@@ -29,6 +30,7 @@ const rotas = createBrowserRouter([
       { path: 'cadastro', element: <Cadastro /> },
       { path: 'esqueci-senha', element: <EsqueciSenha /> },
       { path: 'redefinir-senha', element: <RedefinirSenha /> },
+      { path: 'confirmar-email', element: <ConfirmarEmail /> },
       { path: 'imovel/novo', element: <NovoImovel /> },
       { path: 'imovel/:imovelId', element: <DetalheImovel /> },
       { path: 'minhas-reservas', element: <MinhasReservas /> },

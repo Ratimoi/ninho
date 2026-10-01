@@ -14,6 +14,12 @@ interface RecuperacaoSenhaParaEmail {
     link: string
 }
 
+interface ConfirmacaoCadastroParaEmail {
+    destinatarioEmail: string
+    destinatarioNome: string
+    link: string
+}
+
 export interface ResultadoEmail {
     enviado: boolean
     motivo?: string
@@ -52,6 +58,38 @@ export async function enviarEmailResposta(dados: RespostaParaEmail): Promise<Res
                     ${escaparHtml(dados.resposta)}
                 </blockquote>
                 <p style="color: #6b7280; font-size: 13px;">Acesse o Ninho para ver mais detalhes.</p>
+            `
+        })
+
+        if (error) {
+            return { enviado: false, motivo: error.message }
+        }
+
+        return { enviado: true }
+    } catch (error) {
+        return { enviado: false, motivo: "Erro ao contatar o serviço de e-mail" }
+    }
+}
+
+export async function enviarEmailConfirmacaoCadastro(dados: ConfirmacaoCadastroParaEmail): Promise<ResultadoEmail> {
+    const apiKey = process.env.RESEND_API_KEY
+
+    if (!apiKey) {
+        return { enviado: false, motivo: "RESEND_API_KEY não configurada" }
+    }
+
+    const resend = new Resend(apiKey)
+
+    try {
+        const { error } = await resend.emails.send({
+            from: "Ninho <onboarding@resend.dev>",
+            to: [dados.destinatarioEmail],
+            subject: "Confirme seu cadastro — Ninho",
+            html: `
+                <p>Olá, ${escaparHtml(dados.destinatarioNome)}!</p>
+                <p>Falta só um passo para ativar sua conta no Ninho. Clique no link abaixo para confirmar seu e-mail:</p>
+                <p><a href="${dados.link}" style="color: #3c6530; font-weight: 600;">Confirmar meu cadastro</a></p>
+                <p style="color: #6b7280; font-size: 13px;">O link expira em 24 horas. Se você não pediu esse cadastro, pode ignorar este e-mail.</p>
             `
         })
 

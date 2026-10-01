@@ -3,7 +3,7 @@ import { z } from 'zod'
 import crypto from "crypto"
 import { prisma } from "../../lib/prisma"
 import { hashSenha, compararSenha, gerarToken, autenticarCliente, definirCookieAuth, limparCookieAuth } from "../../lib/auth"
-import { enviarEmailRecuperacaoSenha } from "../../lib/email"
+import { enviarEmailRecuperacaoSenha, enviarEmailConfirmacaoCadastro } from "../../lib/email"
 import { tratarErroPrisma } from "../../lib/erros"
 import { limiteAutenticacao } from "../../lib/rateLimit"
 
@@ -29,7 +29,12 @@ const redefinirSenhaSchema = z.object({
     novaSenha: z.string().min(6, { message: "Senha deve possuir, no mínimo, 6 caracteres" })
 })
 
+const confirmarEmailSchema = z.object({
+    token: z.string().min(1)
+})
+
 const TOKEN_VALIDADE_MS = 30 * 60 * 1000
+const CONFIRMACAO_VALIDADE_MS = 24 * 60 * 60 * 1000
 
 function hashToken(token: string) {
     return crypto.createHash("sha256").update(token).digest("hex")
@@ -37,6 +42,8 @@ function hashToken(token: string) {
 
 const semSenha = { id: true, nome: true, email: true }
 
+// A conta só é criada de verdade quando o link do e-mail é confirmado —
+// até lá, os dados ficam só no cadastro pendente (senha já hasheada).
 router.post("/cadastro", limiteAutenticacao, async (req, res) => {
     const valida = usuarioSchema.safeParse(req.body)
     if (!valida.success) {
@@ -47,17 +54,81 @@ router.post("/cadastro", limiteAutenticacao, async (req, res) => {
     const { nome, email, senha } = valida.data
 
     try {
+        const usuarioExistente = await prisma.usuario.findUnique({ where: { email } })
+        if (usuarioExistente) {
+            res.status(409).json({ erro: "Já existe uma conta com este email" })
+            return
+        }
+
+        const tokenBruto = crypto.randomBytes(32).toString("hex")
+
+        // upsert: se a pessoa tentar cadastrar de novo antes de confirmar
+        // (não achou o e-mail, link expirou), reenvia com um token novo em
+        // vez de ficar preso no primeiro envio.
+        await prisma.cadastroPendente.upsert({
+            where: { email },
+            create: {
+                nome, email,
+                senha: await hashSenha(senha),
+                token: hashToken(tokenBruto),
+                expiraEm: new Date(Date.now() + CONFIRMACAO_VALIDADE_MS)
+            },
+            update: {
+                nome,
+                senha: await hashSenha(senha),
+                token: hashToken(tokenBruto),
+                expiraEm: new Date(Date.now() + CONFIRMACAO_VALIDADE_MS)
+            }
+        })
+
+        const origemFrontend = process.env.FRONTEND_URL ?? "http://localhost:5173"
+        await enviarEmailConfirmacaoCadastro({
+            destinatarioEmail: email,
+            destinatarioNome: nome,
+            link: `${origemFrontend}/confirmar-email?token=${tokenBruto}`
+        })
+
+        res.status(200).json({ mensagem: "Enviamos um link de confirmação para o seu e-mail." })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível iniciar o cadastro" })
+    }
+})
+
+router.post("/confirmar-email", limiteAutenticacao, async (req, res) => {
+    const valida = confirmarEmailSchema.safeParse(req.body)
+    if (!valida.success) {
+        res.status(400).json({ erro: valida.error })
+        return
+    }
+
+    try {
+        const pendente = await prisma.cadastroPendente.findFirst({
+            where: { token: hashToken(valida.data.token), expiraEm: { gt: new Date() } }
+        })
+
+        if (!pendente) {
+            res.status(400).json({ erro: "Link inválido ou expirado" })
+            return
+        }
+
         const usuario = await prisma.usuario.create({
-            data: { nome, email, senha: await hashSenha(senha) },
+            data: { nome: pendente.nome, email: pendente.email, senha: pendente.senha },
             select: semSenha
         })
-        res.status(201).json(usuario)
+
+        await prisma.cadastroPendente.delete({ where: { id: pendente.id } })
+
+        const token = gerarToken(usuario.id, "cliente")
+        definirCookieAuth(res, "cliente", token)
+        res.status(200).json({ usuario })
     } catch (error: any) {
         if (error.code === "P2002") {
             res.status(409).json({ erro: "Já existe uma conta com este email" })
             return
         }
-        res.status(400).json({ erro: error })
+        console.error(error)
+        res.status(500).json({ erro: "Não foi possível confirmar o cadastro" })
     }
 })
 

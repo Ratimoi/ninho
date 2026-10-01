@@ -19,6 +19,20 @@ model Usuario {
   @@map("usuario")
 }
 
+// Cadastro ainda não confirmado por e-mail. Só vira um Usuario de verdade
+// quando o link de confirmação é clicado — então a conta não é criada e-mail
+// não é só anotado "pendente", ela simplesmente não existe até confirmar.
+model CadastroPendente {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  token     String   @unique
+  expiraEm  DateTime
+  criadaEm  DateTime @default(now())
+  @@map("cadastro_pendente")
+}
+
 model Admin {
   id              String @id @default(uuid())
   nome            String
