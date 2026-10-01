@@ -132,7 +132,7 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
                         multiple
                         onChange={e => enviarArquivos(e.target.files)}
                         disabled={enviandoFotos}
-                        className="text-sm"
+                        className="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 file:cursor-pointer disabled:opacity-50"
                     />
                     {enviandoFotos && <p className="text-sm text-gray-400 mt-1">Enviando...</p>}
                 </div>

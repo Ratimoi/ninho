@@ -153,7 +153,7 @@ export default function NovoImovel() {
                                 accept="image/*"
                                 multiple
                                 onChange={e => setArquivos(e.target.files ? Array.from(e.target.files) : [])}
-                                className="text-sm"
+                                className="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 file:cursor-pointer"
                             />
                             {arquivos.length > 0 && (
                                 <p className="text-xs text-gray-500 mt-1">{arquivos.length} arquivo(s) selecionado(s)</p>
