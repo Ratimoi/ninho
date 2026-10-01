@@ -28,6 +28,11 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
         const response = await fetch(`${apiUrl}/imovel/${imovelId}/imagens`, {
             method: "POST",
             credentials: "include",
+            // multipart/form-data sem headers extras é uma requisição "simples"
+            // pro CORS — o navegador não faz preflight, então o cookie (SameSite=None)
+            // iria junto numa submissão disparada por outro site. Esse header
+            // força o preflight, onde a allowlist de origem do backend barra.
+            headers: { "X-Requested-With": "XMLHttpRequest" },
             body: formData
         })
         setEnviandoFotos(false)

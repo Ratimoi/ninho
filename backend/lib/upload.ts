@@ -14,9 +14,20 @@ const storage = multer.diskStorage({
     }
 })
 
+// Só formatos raster — nunca SVG: um SVG pode embutir <script>, e como os
+// uploads são servidos estaticamente no próprio domínio da API, abrir o link
+// de um SVG malicioso executaria o script nesse domínio (mesma origem dos
+// cookies de sessão, mesmo sendo httpOnly).
+const TIPOS_PERMITIDOS = ["image/jpeg", "image/png", "image/gif", "image/webp"]
+
+// Classe própria em vez de comparar err.message por string — mais robusto
+// no middleware de erro do server.ts, que precisa identificar esse erro sem
+// deixá-lo cair no handler padrão do Express (que vaza stack trace em HTML).
+export class ErroTipoArquivo extends Error {}
+
 function filtroImagem(req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) {
-    if (!file.mimetype.startsWith("image/")) {
-        cb(new Error("Somente arquivos de imagem são permitidos"))
+    if (!TIPOS_PERMITIDOS.includes(file.mimetype)) {
+        cb(new ErroTipoArquivo("Formato de imagem não suportado (use JPEG, PNG, GIF ou WEBP)"))
         return
     }
     cb(null, true)

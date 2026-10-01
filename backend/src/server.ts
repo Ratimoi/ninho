@@ -6,6 +6,7 @@ import helmet from "helmet"
 import cookieParser from "cookie-parser"
 import { MulterError } from "multer"
 import { limiteGeral } from "../lib/rateLimit"
+import { ErroTipoArquivo } from "../lib/upload"
 
 import routesImoveis from './routes/imovel'
 import routesReservas from './routes/reserva'
@@ -55,15 +56,19 @@ app.get("/", (req, res) => {
 // Erros do multer (tipo de arquivo inválido, tamanho acima do limite) chegam
 // aqui via next(err) e passariam batido pelo try/catch das rotas normais.
 app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
-    if (err instanceof MulterError) {
-        res.status(400).json({ erro: err.message })
-        return
-    }
-    if (err instanceof Error && err.message === "Somente arquivos de imagem são permitidos") {
+    if (err instanceof MulterError || err instanceof ErroTipoArquivo) {
         res.status(400).json({ erro: err.message })
         return
     }
     next(err)
+})
+
+// Rede de segurança final: qualquer erro que escape dos try/catch das rotas
+// e dos handlers acima cai aqui. Sem isso, o handler padrão do Express
+// devolve uma página HTML com a stack trace completa pro cliente.
+app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
+    console.error(err)
+    res.status(500).json({ erro: "Erro interno do servidor" })
 })
 
 const PORT = process.env.PORT || 3000

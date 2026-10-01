@@ -1,4 +1,4 @@
-import { Router } from "express"
+import { Router, type Request, type Response, type NextFunction } from "express"
 import { z } from 'zod'
 import path from "path"
 import fs from "fs"
@@ -241,7 +241,20 @@ async function verificarDono(req: any, res: any, imovelId: number) {
     return imovel
 }
 
-router.post("/:id/imagens", autenticarQualquer, upload.array("imagens", 10), async (req, res) => {
+// multipart/form-data sem headers extras é uma requisição "simples" pro CORS
+// (sem preflight) — sem essa checagem, um site malicioso poderia disparar o
+// upload usando a sessão da vítima (cookie vai junto por causa do
+// SameSite=None exigido pelo domínio cruzado Vercel/Render). O frontend
+// sempre manda esse header; sua ausência só acontece numa submissão forjada.
+function exigirRequisicaoAjax(req: Request, res: Response, next: NextFunction) {
+    if (req.headers["x-requested-with"] !== "XMLHttpRequest") {
+        res.status(403).json({ erro: "Requisição não permitida" })
+        return
+    }
+    next()
+}
+
+router.post("/:id/imagens", autenticarQualquer, exigirRequisicaoAjax, upload.array("imagens", 10), async (req, res) => {
     const id = Number(req.params.id)
     const arquivos = req.files as Express.Multer.File[] | undefined
 
