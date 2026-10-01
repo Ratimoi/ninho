@@ -21,6 +21,7 @@ export default function MinhasReservas() {
     const [avaliando, setAvaliando] = useState<number | null>(null)
     const [nota, setNota] = useState(5)
     const [comentario, setComentario] = useState("")
+    const [enviando, setEnviando] = useState(false)
 
     async function buscar() {
         if (!cliente) return
@@ -36,14 +37,16 @@ export default function MinhasReservas() {
     }, [])
 
     async function enviarAvaliacao(id: number) {
-        if (!cliente) return
+        if (!cliente || !comentario.trim()) return
 
+        setEnviando(true)
         const response = await fetch(`${apiUrl}/reserva/${id}/avaliar`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({ nota, avaliacao: comentario })
         })
+        setEnviando(false)
 
         if (!response.ok) {
             toast.error("Não foi possível enviar a avaliação")
@@ -108,8 +111,27 @@ export default function MinhasReservas() {
                                         onChange={e => setComentario(e.target.value)}
                                         className="p-2 border border-cream-200 bg-cream-50 rounded-xl"
                                     />
-                                    <Button onClick={() => enviarAvaliacao(reserva.id)} className="self-start text-sm px-3 py-2">
-                                        Enviar avaliação
+                                    <Button
+                                        onClick={() => enviarAvaliacao(reserva.id)}
+                                        disabled={!comentario.trim() || enviando}
+                                        className="self-start text-sm px-4 py-2 flex items-center gap-2"
+                                    >
+                                        {enviando ? (
+                                            <>
+                                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                                </svg>
+                                                Enviando...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M3.4 20.4l17.45-7.48a.5.5 0 000-.92L3.4 3.52a.5.5 0 00-.7.56l1.6 6.6a1 1 0 00.78.75l9.12 1.57-9.12 1.57a1 1 0 00-.78.75l-1.6 6.6a.5.5 0 00.7.56z" />
+                                                </svg>
+                                                Enviar avaliação
+                                            </>
+                                        )}
                                     </Button>
                                 </div>
                             ) : (

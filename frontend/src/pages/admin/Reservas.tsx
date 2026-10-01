@@ -16,6 +16,7 @@ const statusTom: Record<StatusReserva, "amber" | "brand" | "red"> = {
 export default function ReservasAdmin() {
     const [reservas, setReservas] = useState<ReservaType[]>([])
     const [resposta, setResposta] = useState<Record<number, string>>({})
+    const [enviando, setEnviando] = useState<number | null>(null)
 
     async function buscar() {
         const response = await fetch(`${apiUrl}/reserva`, {
@@ -29,15 +30,17 @@ export default function ReservasAdmin() {
     }, [])
 
     async function responder(id: number) {
-        const texto = resposta[id]
+        const texto = resposta[id]?.trim()
         if (!texto) return
 
+        setEnviando(id)
         const response = await fetch(`${apiUrl}/reserva/${id}/responder`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({ respostaAdmin: texto })
         })
+        setEnviando(null)
 
         if (!response.ok) {
             toast.error("Não foi possível enviar a resposta")
@@ -132,10 +135,26 @@ export default function ReservasAdmin() {
                                     placeholder="Responder ao cliente..."
                                     value={resposta[reserva.id] ?? ""}
                                     onChange={e => setResposta({ ...resposta, [reserva.id]: e.target.value })}
-                                    className="flex-1 p-2.5 text-sm border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400"
+                                    onKeyDown={e => e.key === "Enter" && responder(reserva.id)}
+                                    disabled={enviando === reserva.id}
+                                    className="flex-1 p-2.5 text-sm border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400 disabled:opacity-60"
                                 />
-                                <Button onClick={() => responder(reserva.id)} className="text-sm px-3 py-2">
-                                    Enviar
+                                <Button
+                                    onClick={() => responder(reserva.id)}
+                                    disabled={!resposta[reserva.id]?.trim() || enviando === reserva.id}
+                                    aria-label="Enviar resposta"
+                                    className="shrink-0 w-10 h-10 p-0 flex items-center justify-center rounded-full"
+                                >
+                                    {enviando === reserva.id ? (
+                                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                        </svg>
+                                    ) : (
+                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M3.4 20.4l17.45-7.48a.5.5 0 000-.92L3.4 3.52a.5.5 0 00-.7.56l1.6 6.6a1 1 0 00.78.75l9.12 1.57-9.12 1.57a1 1 0 00-.78.75l-1.6 6.6a.5.5 0 00.7.56z" />
+                                        </svg>
+                                    )}
                                 </Button>
                             </div>
                         )}
