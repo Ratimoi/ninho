@@ -8,6 +8,12 @@ interface RespostaParaEmail {
     resposta: string
 }
 
+interface RecuperacaoSenhaParaEmail {
+    destinatarioEmail: string
+    destinatarioNome: string
+    link: string
+}
+
 export interface ResultadoEmail {
     enviado: boolean
     motivo?: string
@@ -46,6 +52,38 @@ export async function enviarEmailResposta(dados: RespostaParaEmail): Promise<Res
                     ${escaparHtml(dados.resposta)}
                 </blockquote>
                 <p style="color: #6b7280; font-size: 13px;">Acesse o Ninho para ver mais detalhes.</p>
+            `
+        })
+
+        if (error) {
+            return { enviado: false, motivo: error.message }
+        }
+
+        return { enviado: true }
+    } catch (error) {
+        return { enviado: false, motivo: "Erro ao contatar o serviço de e-mail" }
+    }
+}
+
+export async function enviarEmailRecuperacaoSenha(dados: RecuperacaoSenhaParaEmail): Promise<ResultadoEmail> {
+    const apiKey = process.env.RESEND_API_KEY
+
+    if (!apiKey) {
+        return { enviado: false, motivo: "RESEND_API_KEY não configurada" }
+    }
+
+    const resend = new Resend(apiKey)
+
+    try {
+        const { error } = await resend.emails.send({
+            from: "Ninho <onboarding@resend.dev>",
+            to: [dados.destinatarioEmail],
+            subject: "Recuperação de senha — Ninho",
+            html: `
+                <p>Olá, ${escaparHtml(dados.destinatarioNome)}!</p>
+                <p>Recebemos um pedido para redefinir a senha da sua conta no Ninho. Clique no link abaixo para escolher uma nova senha:</p>
+                <p><a href="${dados.link}" style="color: #3c6530; font-weight: 600;">Redefinir minha senha</a></p>
+                <p style="color: #6b7280; font-size: 13px;">O link expira em 30 minutos. Se você não pediu essa recuperação, pode ignorar este e-mail.</p>
             `
         })
 

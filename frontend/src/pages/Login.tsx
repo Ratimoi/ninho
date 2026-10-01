@@ -58,7 +58,10 @@ export default function Login() {
                         Entrar
                     </Button>
                 </form>
-                <p className="mt-5 text-sm text-gray-500">
+                <p className="mt-3 text-sm text-gray-500">
+                    <Link to="/esqueci-senha" className="text-accent-600 font-medium underline">Esqueceu a senha?</Link>
+                </p>
+                <p className="mt-2 text-sm text-gray-500">
                     Não tem conta? <Link to="/cadastro" className="text-accent-600 font-medium underline">Cadastre-se</Link>
                 </p>
             </Card>

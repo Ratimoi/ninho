@@ -8,12 +8,14 @@ datasource db {
 }
 
 model Usuario {
-  id              String @id @default(uuid())
-  nome            String
-  email           String @unique
-  senha           String
-  imoveis         Imovel[]  @relation("ImoveisDoDono")
-  reservas        Reserva[] @relation("ReservasDoCliente")
+  id                String @id @default(uuid())
+  nome              String
+  email             String @unique
+  senha             String
+  resetToken        String?   @unique
+  resetTokenExpira  DateTime?
+  imoveis           Imovel[]  @relation("ImoveisDoDono")
+  reservas          Reserva[] @relation("ReservasDoCliente")
   @@map("usuario")
 }
 
