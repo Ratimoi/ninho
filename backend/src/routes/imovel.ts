@@ -4,7 +4,7 @@ import path from "path"
 import fs from "fs"
 import { prisma } from "../../lib/prisma"
 import { autenticarCliente, autenticarQualquer } from "../../lib/auth"
-import { gerarInsightImovel } from "../../lib/ai"
+import { gerarInsightImovel, gerarSugestaoAnuncio } from "../../lib/ai"
 import { upload, pastaUploads } from "../../lib/upload"
 import { tratarErroPrisma } from "../../lib/erros"
 
@@ -16,6 +16,13 @@ const imovelSchema = z.object({
     preco: z.number().positive(),
     endereco: z.string().min(3),
     cidade: z.string().min(2),
+    quartos: z.number().int().positive()
+})
+
+const sugestaoSchema = z.object({
+    titulo: z.string().min(3),
+    cidade: z.string().min(2),
+    endereco: z.string().min(3),
     quartos: z.number().int().positive()
 })
 
@@ -129,6 +136,19 @@ router.get("/:id", async (req, res) => {
     } catch (error) {
         res.status(500).json({ erro: error })
     }
+})
+
+// Ao anunciar um imóvel: gera descrição + sugestão de preço a partir dos
+// outros campos já preenchidos (título, cidade, endereço, quartos).
+router.post("/sugestao-ia", autenticarCliente, async (req, res) => {
+    const valida = sugestaoSchema.safeParse(req.body)
+    if (!valida.success) {
+        res.status(400).json({ erro: valida.error })
+        return
+    }
+
+    const sugestao = await gerarSugestaoAnuncio(valida.data)
+    res.status(200).json(sugestao)
 })
 
 router.post("/", autenticarCliente, async (req, res) => {
