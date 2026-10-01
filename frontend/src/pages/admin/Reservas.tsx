@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import type { ReservaType, StatusReserva } from "../../utils/types"
-import { obterAdminToken } from "../../utils/auth"
 import { Button } from "../../components/ui/Button"
 import { Card } from "../../components/ui/Card"
 import { Badge } from "../../components/ui/Badge"
@@ -17,11 +16,10 @@ const statusTom: Record<StatusReserva, "amber" | "brand" | "red"> = {
 export default function ReservasAdmin() {
     const [reservas, setReservas] = useState<ReservaType[]>([])
     const [resposta, setResposta] = useState<Record<number, string>>({})
-    const token = obterAdminToken()
 
     async function buscar() {
         const response = await fetch(`${apiUrl}/reserva`, {
-            headers: { Authorization: `Bearer ${token}` }
+            credentials: "include"
         })
         setReservas(await response.json())
     }
@@ -36,7 +34,8 @@ export default function ReservasAdmin() {
 
         const response = await fetch(`${apiUrl}/reserva/${id}/responder`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ respostaAdmin: texto })
         })
 
@@ -59,7 +58,8 @@ export default function ReservasAdmin() {
     async function mudarStatus(id: number, status: StatusReserva) {
         const response = await fetch(`${apiUrl}/reserva/${id}/status`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ status })
         })
 
@@ -76,7 +76,7 @@ export default function ReservasAdmin() {
 
         const response = await fetch(`${apiUrl}/reserva/${id}`, {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` }
+            credentials: "include"
         })
 
         if (!response.ok) {

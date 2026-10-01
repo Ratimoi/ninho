@@ -3,6 +3,7 @@ import cors from "cors"
 import dotenv from "dotenv"
 import path from "path"
 import helmet from "helmet"
+import cookieParser from "cookie-parser"
 import { MulterError } from "multer"
 import { limiteGeral } from "../lib/rateLimit"
 
@@ -28,12 +29,15 @@ app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { poli
 // CORS antes do rate limit: uma resposta 429 também precisa dos cabeçalhos de
 // CORS, senão o navegador descarta a mensagem do limiter como erro de CORS.
 // Em produção, restringe o CORS à URL do frontend (definida no deploy).
-// Sem essa variável (ex: em dev local), libera qualquer origem.
-const origensPermitidas = process.env.FRONTEND_URL
-app.use(cors(origensPermitidas ? { origin: origensPermitidas } : undefined))
+// Sem essa variável (ex: em dev local), libera só o Vite local.
+// credentials:true + origem explícita (nunca "*") são obrigatórios pro
+// navegador aceitar enviar/receber o cookie httpOnly de autenticação.
+const origensPermitidas = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : ["http://localhost:5173"]
+app.use(cors({ origin: origensPermitidas, credentials: true }))
 
 app.use(limiteGeral)
 app.use(express.json({ limit: "1mb" }))
+app.use(cookieParser())
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")))
 
 app.use("/imovel", routesImoveis)

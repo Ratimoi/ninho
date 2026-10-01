@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts"
 import type { DashboardType } from "../../utils/types"
-import { obterAdminToken } from "../../utils/auth"
 import { Card } from "../../components/ui/Card"
 
 const apiUrl = import.meta.env.VITE_API_URL
@@ -21,9 +20,8 @@ export default function Dashboard() {
 
     useEffect(() => {
         async function buscar() {
-            const token = obterAdminToken()
             const response = await fetch(`${apiUrl}/dashboard`, {
-                headers: { Authorization: `Bearer ${token}` }
+                credentials: "include"
             })
             setDados(await response.json())
         }

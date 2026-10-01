@@ -1,27 +1,17 @@
 import type { UsuarioType } from "./types"
 
-// Requisito 5: manter conectado salvando o id do cliente (string UUID) no
-// LocalStorage. Guardamos o id numa chave própria (literal ao requisito) e o
-// restante dos dados + token em outra, para recuperar tudo no próximo acesso.
-const CLIENTE_ID_KEY = "ninho_cliente_id"
+const apiUrl = import.meta.env.VITE_API_URL
+
+// O token de sessão vive só num cookie httpOnly definido pelo backend —
+// nunca passa por aqui, então um XSS não consegue lê-lo via JavaScript.
+// O que fica no LocalStorage é só uma cópia não sensível dos dados do
+// usuário/admin, usada pra UI (saudação, checagem de "está logado").
+// Requisito 5: manter conectado — o id do cliente também fica salvo aqui.
 const CLIENTE_KEY = "ninho_cliente"
-const CLIENTE_TOKEN_KEY = "ninho_cliente_token"
-
 const ADMIN_KEY = "ninho_admin"
-const ADMIN_TOKEN_KEY = "ninho_admin_token"
 
-export function salvarCliente(token: string, usuario: UsuarioType) {
-    localStorage.setItem(CLIENTE_ID_KEY, usuario.id)
+export function salvarCliente(usuario: UsuarioType) {
     localStorage.setItem(CLIENTE_KEY, JSON.stringify(usuario))
-    localStorage.setItem(CLIENTE_TOKEN_KEY, token)
-}
-
-export function obterClienteToken(): string | null {
-    return localStorage.getItem(CLIENTE_TOKEN_KEY)
-}
-
-export function obterClienteId(): string | null {
-    return localStorage.getItem(CLIENTE_ID_KEY)
 }
 
 export function obterCliente(): UsuarioType | null {
@@ -29,19 +19,17 @@ export function obterCliente(): UsuarioType | null {
     return dados ? JSON.parse(dados) : null
 }
 
-export function limparCliente() {
-    localStorage.removeItem(CLIENTE_ID_KEY)
+export function obterClienteId(): string | null {
+    return obterCliente()?.id ?? null
+}
+
+export async function sairCliente() {
+    await fetch(`${apiUrl}/usuario/logout`, { method: "POST", credentials: "include" })
     localStorage.removeItem(CLIENTE_KEY)
-    localStorage.removeItem(CLIENTE_TOKEN_KEY)
 }
 
-export function salvarAdmin(token: string, admin: UsuarioType) {
+export function salvarAdmin(admin: UsuarioType) {
     localStorage.setItem(ADMIN_KEY, JSON.stringify(admin))
-    localStorage.setItem(ADMIN_TOKEN_KEY, token)
-}
-
-export function obterAdminToken(): string | null {
-    return localStorage.getItem(ADMIN_TOKEN_KEY)
 }
 
 export function obterAdmin(): UsuarioType | null {
@@ -49,7 +37,7 @@ export function obterAdmin(): UsuarioType | null {
     return dados ? JSON.parse(dados) : null
 }
 
-export function limparAdmin() {
+export async function sairAdmin() {
+    await fetch(`${apiUrl}/admin/logout`, { method: "POST", credentials: "include" })
     localStorage.removeItem(ADMIN_KEY)
-    localStorage.removeItem(ADMIN_TOKEN_KEY)
 }

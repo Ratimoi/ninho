@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { z } from 'zod'
 import { prisma } from "../../lib/prisma"
-import { hashSenha, compararSenha, gerarToken, autenticarCliente } from "../../lib/auth"
+import { hashSenha, compararSenha, gerarToken, autenticarCliente, definirCookieAuth, limparCookieAuth } from "../../lib/auth"
 import { tratarErroPrisma } from "../../lib/erros"
 import { limiteAutenticacao } from "../../lib/rateLimit"
 
@@ -62,14 +62,19 @@ router.post("/login", limiteAutenticacao, async (req, res) => {
         }
 
         const token = gerarToken(usuario.id, "cliente")
+        definirCookieAuth(res, "cliente", token)
         res.status(200).json({
-            token,
             usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email }
         })
     } catch (error) {
         console.error(error)
         res.status(500).json({ erro: "Não foi possível completar o login" })
     }
+})
+
+router.post("/logout", (req, res) => {
+    limparCookieAuth(res, "cliente")
+    res.status(204).send()
 })
 
 router.get("/me", autenticarCliente, async (req, res) => {

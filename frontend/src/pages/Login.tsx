@@ -20,6 +20,7 @@ export default function Login() {
         const response = await fetch(`${apiUrl}/usuario/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify(data)
         })
 
@@ -29,7 +30,7 @@ export default function Login() {
         }
 
         const dados = await response.json()
-        salvarCliente(dados.token, dados.usuario)
+        salvarCliente(dados.usuario)
         toast.success(`Bem-vindo(a), ${dados.usuario.nome}!`)
         navigate("/")
     }

@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { Navigate, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { obterClienteToken } from "../utils/auth"
+import { obterCliente } from "../utils/auth"
 import { GerenciarFotos } from "../components/GerenciarFotos"
 import { Button } from "../components/ui/Button"
 import { Card } from "../components/ui/Card"
@@ -20,14 +20,14 @@ type Inputs = {
 }
 
 export default function NovoImovel() {
-    const token = obterClienteToken()
+    const cliente = obterCliente()
     const { register, handleSubmit, watch, setValue } = useForm<Inputs>()
     const navigate = useNavigate()
     const [gerandoIA, setGerandoIA] = useState(false)
     const [imovelCriado, setImovelCriado] = useState<{ id: number, imagens: ImagemType[] }>()
 
     async function gerarComIA() {
-        if (!token) return
+        if (!cliente) return
 
         const { titulo, cidade, endereco, quartos } = watch()
         if (!titulo || !cidade || !endereco || !quartos) {
@@ -38,7 +38,8 @@ export default function NovoImovel() {
         setGerandoIA(true)
         const response = await fetch(`${apiUrl}/imovel/sugestao-ia`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ titulo, cidade, endereco, quartos: Number(quartos) })
         })
         const resultado = await response.json()
@@ -55,11 +56,12 @@ export default function NovoImovel() {
     }
 
     async function cadastrar(data: Inputs) {
-        if (!token) return
+        if (!cliente) return
 
         const response = await fetch(`${apiUrl}/imovel`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({
                 ...data,
                 preco: Number(data.preco),
@@ -84,7 +86,7 @@ export default function NovoImovel() {
         setImovelCriado({ id: imovelCriado.id, imagens: dados.imagens })
     }
 
-    if (!token) {
+    if (!cliente) {
         return <Navigate to="/login" replace />
     }
 

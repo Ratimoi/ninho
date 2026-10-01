@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import type { ImovelType } from "../../utils/types"
-import { obterAdminToken } from "../../utils/auth"
 import { Badge } from "../../components/ui/Badge"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
 export default function ImoveisAdmin() {
     const [imoveis, setImoveis] = useState<ImovelType[]>([])
-    const token = obterAdminToken()
 
     async function buscar() {
         const response = await fetch(`${apiUrl}/imovel`)
@@ -22,7 +20,8 @@ export default function ImoveisAdmin() {
     async function alternarDestaque(imovel: ImovelType) {
         const response = await fetch(`${apiUrl}/imovel/${imovel.id}/destaque`, {
             method: "PATCH",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ destaque: !imovel.destaque })
         })
 
@@ -39,7 +38,7 @@ export default function ImoveisAdmin() {
 
         const response = await fetch(`${apiUrl}/imovel/${id}`, {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` }
+            credentials: "include"
         })
 
         if (!response.ok) {

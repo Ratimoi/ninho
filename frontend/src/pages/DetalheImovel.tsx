@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import type { ImovelType } from "../utils/types"
-import { obterCliente, obterClienteToken } from "../utils/auth"
+import { obterCliente } from "../utils/auth"
 import { resolverUrlImagem } from "../utils/imagem"
 import { GerenciarFotos } from "../components/GerenciarFotos"
 import { Button } from "../components/ui/Button"
@@ -34,8 +34,7 @@ export default function DetalheImovel() {
     }, [])
 
     async function reservar(data: Inputs) {
-        const token = obterClienteToken()
-        if (!token || !imovel) return
+        if (!obterCliente() || !imovel) return
 
         if (!data.dataInicio || !data.dataFim) {
             toast.error("Informe as datas de início e fim")
@@ -44,7 +43,8 @@ export default function DetalheImovel() {
 
         const response = await fetch(`${apiUrl}/reserva`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({
                 imovelId: imovel.id,
                 dataInicio: data.dataInicio,

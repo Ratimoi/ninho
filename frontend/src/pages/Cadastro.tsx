@@ -33,10 +33,11 @@ export default function Cadastro() {
         const responseLogin = await fetch(`${apiUrl}/usuario/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ email: data.email, senha: data.senha })
         })
         const dadosLogin = await responseLogin.json()
-        salvarCliente(dadosLogin.token, dadosLogin.usuario)
+        salvarCliente(dadosLogin.usuario)
 
         toast.success("Cadastro realizado com sucesso!")
         navigate("/")

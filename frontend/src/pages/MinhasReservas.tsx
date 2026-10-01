@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Navigate } from "react-router-dom"
 import { toast } from "sonner"
 import type { ReservaType, StatusReserva } from "../utils/types"
-import { obterClienteToken } from "../utils/auth"
+import { obterCliente } from "../utils/auth"
 import { Button } from "../components/ui/Button"
 import { Card } from "../components/ui/Card"
 import { Badge } from "../components/ui/Badge"
@@ -16,16 +16,16 @@ const statusTom: Record<StatusReserva, "amber" | "brand" | "red"> = {
 }
 
 export default function MinhasReservas() {
-    const token = obterClienteToken()
+    const cliente = obterCliente()
     const [reservas, setReservas] = useState<ReservaType[]>([])
     const [avaliando, setAvaliando] = useState<number | null>(null)
     const [nota, setNota] = useState(5)
     const [comentario, setComentario] = useState("")
 
     async function buscar() {
-        if (!token) return
+        if (!cliente) return
         const response = await fetch(`${apiUrl}/reserva/minhas`, {
-            headers: { Authorization: `Bearer ${token}` }
+            credentials: "include"
         })
         const dados = await response.json()
         setReservas(dados)
@@ -36,11 +36,12 @@ export default function MinhasReservas() {
     }, [])
 
     async function enviarAvaliacao(id: number) {
-        if (!token) return
+        if (!cliente) return
 
         const response = await fetch(`${apiUrl}/reserva/${id}/avaliar`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ nota, avaliacao: comentario })
         })
 
@@ -56,7 +57,7 @@ export default function MinhasReservas() {
         buscar()
     }
 
-    if (!token) {
+    if (!cliente) {
         return <Navigate to="/login" replace />
     }
 

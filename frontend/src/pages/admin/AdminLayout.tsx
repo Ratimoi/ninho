@@ -1,21 +1,20 @@
 import { Navigate, NavLink, Outlet, useNavigate } from "react-router-dom"
-import { obterAdmin, obterAdminToken, limparAdmin } from "../../utils/auth"
+import { obterAdmin, sairAdmin } from "../../utils/auth"
 import { Logo } from "../../components/ui/Logo"
 
 const linkClasse = ({ isActive }: { isActive: boolean }) =>
     `block px-3 py-2 rounded-xl text-sm transition-colors ${isActive ? "bg-brand-700 text-white" : "text-brand-200 hover:bg-brand-800"}`
 
 export default function AdminLayout() {
-    const token = obterAdminToken()
     const admin = obterAdmin()
     const navigate = useNavigate()
 
-    if (!token) {
+    if (!admin) {
         return <Navigate to="/admin/login" replace />
     }
 
-    function sair() {
-        limparAdmin()
+    async function sair() {
+        await sairAdmin()
         navigate("/admin/login")
     }
 

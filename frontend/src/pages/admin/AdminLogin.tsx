@@ -20,6 +20,7 @@ export default function AdminLogin() {
         const response = await fetch(`${apiUrl}/admin/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify(data)
         })
 
@@ -29,7 +30,7 @@ export default function AdminLogin() {
         }
 
         const dados = await response.json()
-        salvarAdmin(dados.token, dados.admin)
+        salvarAdmin(dados.admin)
         navigate("/admin")
     }
 

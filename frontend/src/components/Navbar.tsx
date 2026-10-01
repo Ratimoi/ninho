@@ -1,13 +1,13 @@
 import { Link, useNavigate } from "react-router-dom"
-import { obterCliente, limparCliente } from "../utils/auth"
+import { obterCliente, sairCliente } from "../utils/auth"
 import { Logo } from "./ui/Logo"
 
 export function Navbar() {
     const navigate = useNavigate()
     const cliente = obterCliente()
 
-    function sair() {
-        limparCliente()
+    async function sair() {
+        await sairCliente()
         navigate("/")
     }
 

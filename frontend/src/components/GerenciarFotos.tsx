@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 import { toast } from "sonner"
 import type { ImagemType } from "../utils/types"
-import { obterClienteToken } from "../utils/auth"
+import { obterCliente } from "../utils/auth"
 import { resolverUrlImagem } from "../utils/imagem"
 import { Button } from "./ui/Button"
 
@@ -19,8 +19,7 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
     const inputArquivoRef = useRef<HTMLInputElement>(null)
 
     async function enviarArquivos(arquivos: FileList | null) {
-        const token = obterClienteToken()
-        if (!token || !arquivos || arquivos.length === 0) return
+        if (!obterCliente() || !arquivos || arquivos.length === 0) return
 
         const formData = new FormData()
         Array.from(arquivos).forEach(arquivo => formData.append("imagens", arquivo))
@@ -28,7 +27,7 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
         setEnviandoFotos(true)
         const response = await fetch(`${apiUrl}/imovel/${imovelId}/imagens`, {
             method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
             body: formData
         })
         setEnviandoFotos(false)
@@ -44,12 +43,12 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
     }
 
     async function anexarPorUrl() {
-        const token = obterClienteToken()
-        if (!token || !urlFoto.trim()) return
+        if (!obterCliente() || !urlFoto.trim()) return
 
         const response = await fetch(`${apiUrl}/imovel/${imovelId}/imagens/url`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({ url: urlFoto.trim() })
         })
 
@@ -65,24 +64,22 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
     }
 
     async function definirCapa(imagemId: number) {
-        const token = obterClienteToken()
-        if (!token) return
+        if (!obterCliente()) return
 
         await fetch(`${apiUrl}/imovel/${imovelId}/imagens/${imagemId}/capa`, {
             method: "PATCH",
-            headers: { Authorization: `Bearer ${token}` }
+            credentials: "include"
         })
         onAtualizar()
     }
 
     async function excluirFoto(imagemId: number) {
-        const token = obterClienteToken()
-        if (!token) return
+        if (!obterCliente()) return
         if (!confirm("Excluir esta foto?")) return
 
         await fetch(`${apiUrl}/imovel/${imovelId}/imagens/${imagemId}`, {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` }
+            credentials: "include"
         })
         onAtualizar()
     }
