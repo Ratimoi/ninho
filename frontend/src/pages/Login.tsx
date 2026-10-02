@@ -38,30 +38,34 @@ export default function Login() {
     return (
         <div className="max-w-sm mx-auto mt-12">
             <Card className="p-8">
-                <h1 className="text-3xl font-display font-semibold mb-6 text-brand-900">Entrar</h1>
+                <h1 className="text-3xl font-display font-bold mb-6 text-ink-900 tracking-tight">Entrar</h1>
                 <form onSubmit={handleSubmit(entrar)} className="flex flex-col gap-3">
                     <input
                         type="email"
                         placeholder="Email"
-                        className="p-3 border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400"
+                        className="p-3 border border-line-200 bg-paper-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-400"
                         required
                         {...register("email")}
                     />
                     <input
                         type="password"
                         placeholder="Senha"
-                        className="p-3 border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400"
+                        className="p-3 border border-line-200 bg-paper-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-400"
                         required
                         {...register("senha")}
                     />
-                    <Button type="submit" className="mt-2">
+                    <Button
+                        type="submit"
+                        className="mt-2"
+                        icon={<svg className="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                    >
                         Entrar
                     </Button>
                 </form>
-                <p className="mt-3 text-sm text-gray-500">
+                <p className="mt-3 text-sm text-ink-400">
                     <Link to="/esqueci-senha" className="text-accent-600 font-medium underline">Esqueceu a senha?</Link>
                 </p>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-ink-400">
                     Não tem conta? <Link to="/cadastro" className="text-accent-600 font-medium underline">Cadastre-se</Link>
                 </p>
             </Card>

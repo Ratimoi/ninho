@@ -55,15 +55,15 @@ export default function Home() {
     return (
         <>
             <div className="mb-8 pt-4">
-                <h1 className="mb-3 text-4xl md:text-6xl font-display font-semibold text-brand-900 leading-tight">
+                <h1 className="mb-3 text-4xl md:text-6xl font-display font-bold text-ink-900 leading-tight tracking-tight">
                     Encontre o imóvel <span className="text-accent-500">certo pra você</span>
                 </h1>
-                <p className="text-gray-500 text-lg">Aluguel de imóveis com praticidade, do anúncio até a chave na mão.</p>
+                <p className="text-ink-400 text-lg">Aluguel de imóveis com praticidade, do anúncio até a chave na mão.</p>
             </div>
 
             <div className="flex flex-wrap gap-3 mb-8">
                 <form className="flex-1 min-w-64" onSubmit={handleSubmit(enviaPesquisa)}>
-                    <div className="flex bg-white rounded-full shadow-sm border border-cream-200 overflow-hidden">
+                    <div className="flex bg-white rounded-xl shadow-lg shadow-ink-900/5 overflow-hidden">
                         <input
                             type="search"
                             placeholder="Buscar por título, cidade ou descrição"
@@ -72,7 +72,7 @@ export default function Home() {
                         />
                         <button
                             type="submit"
-                            className="px-5 py-3 text-sm font-medium text-white bg-brand-700 hover:bg-brand-800 transition-colors"
+                            className="px-5 py-3 text-sm font-semibold text-ink-900 bg-accent-400 hover:bg-accent-500 transition-colors"
                         >
                             Pesquisar
                         </button>
@@ -80,8 +80,7 @@ export default function Home() {
                 </form>
                 <Button
                     type="button"
-                    variant={somenteDestaques ? "outline" : "accent"}
-                    className="rounded-full"
+                    variant={somenteDestaques ? "outline" : "primary"}
                     onClick={somenteDestaques ? mostraTodos : mostraDestaques}
                 >
                     {somenteDestaques ? "Ver todos" : "✨ Exibir destaques"}
@@ -89,7 +88,7 @@ export default function Home() {
             </div>
 
             {imoveis.length === 0 ? (
-                <p className="text-gray-400 text-center py-12">Nenhum imóvel encontrado.</p>
+                <p className="text-ink-200 text-center py-12">Nenhum imóvel encontrado.</p>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                     {imoveis.map(imovel => (

@@ -38,10 +38,10 @@ export default function RedefinirSenha() {
     return (
         <div className="max-w-sm mx-auto mt-12">
             <Card className="p-8">
-                <h1 className="text-3xl font-display font-semibold mb-6 text-brand-900">Redefinir senha</h1>
+                <h1 className="text-3xl font-display font-bold mb-6 text-ink-900 tracking-tight">Redefinir senha</h1>
 
                 {!token ? (
-                    <p className="text-gray-600">
+                    <p className="text-ink-400">
                         Link inválido. <Link to="/esqueci-senha" className="text-accent-600 font-medium underline">Peça um novo link</Link>.
                     </p>
                 ) : (
@@ -49,12 +49,16 @@ export default function RedefinirSenha() {
                         <input
                             type="password"
                             placeholder="Nova senha (mínimo 6 caracteres)"
-                            className="p-3 border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400"
+                            className="p-3 border border-line-200 bg-paper-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-400"
                             required
                             minLength={6}
                             {...register("novaSenha")}
                         />
-                        <Button type="submit" className="mt-2">
+                        <Button
+                            type="submit"
+                            className="mt-2"
+                            icon={<svg className="w-4 h-4" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="2" /><path d="M8 11V7a4 4 0 118 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>}
+                        >
                             Redefinir senha
                         </Button>
                     </form>

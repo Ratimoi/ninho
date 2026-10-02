@@ -9,9 +9,9 @@ import { Badge } from "../components/ui/Badge"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
-const statusTom: Record<StatusReserva, "amber" | "brand" | "red"> = {
+const statusTom: Record<StatusReserva, "amber" | "accent" | "red"> = {
     PENDENTE: "amber",
-    CONFIRMADA: "brand",
+    CONFIRMADA: "accent",
     CANCELADA: "red"
 }
 
@@ -66,30 +66,30 @@ export default function MinhasReservas() {
 
     return (
         <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl font-display font-semibold text-brand-900 mb-6">Minhas reservas</h1>
+            <h1 className="text-3xl font-display font-bold text-ink-900 mb-6 tracking-tight">Minhas reservas</h1>
 
             {reservas.length === 0 ? (
-                <p className="text-gray-400 text-center py-12">Você ainda não fez nenhuma reserva.</p>
+                <p className="text-ink-200 text-center py-12">Você ainda não fez nenhuma reserva.</p>
             ) : (
                 <div className="flex flex-col gap-4">
                     {reservas.map(reserva => (
                         <Card key={reserva.id}>
                             <div className="flex justify-between items-start mb-2">
                                 <div>
-                                    <p className="font-display font-semibold text-lg text-gray-900">{reserva.imovel?.titulo}</p>
-                                    <p className="text-sm text-gray-500">{reserva.imovel?.cidade}</p>
+                                    <p className="font-display font-semibold text-lg text-ink-900">{reserva.imovel?.titulo}</p>
+                                    <p className="text-sm text-ink-400">{reserva.imovel?.cidade}</p>
                                 </div>
                                 <Badge tone={statusTom[reserva.status]}>{reserva.status}</Badge>
                             </div>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-ink-400">
                                 {new Date(reserva.dataInicio).toLocaleDateString("pt-br")} até {new Date(reserva.dataFim).toLocaleDateString("pt-br")}
                             </p>
-                            <p className="text-sm text-gray-800 font-semibold">
+                            <p className="text-sm text-ink-900 font-semibold">
                                 R$ {reserva.valorTotal.toLocaleString("pt-br", { minimumFractionDigits: 2 })}
                             </p>
 
                             {reserva.respostaAdmin && (
-                                <div className="mt-3 p-3 bg-brand-50 border border-brand-100 rounded-xl text-sm text-brand-800">
+                                <div className="mt-3 p-3 bg-accent-100 rounded-xl text-sm text-ink-900">
                                     <strong>Resposta:</strong> {reserva.respostaAdmin}
                                 </div>
                             )}
@@ -101,7 +101,7 @@ export default function MinhasReservas() {
                                     <select
                                         value={nota}
                                         onChange={e => setNota(Number(e.target.value))}
-                                        className="p-2 border border-cream-200 bg-cream-50 rounded-xl w-24"
+                                        className="p-2 border border-line-200 bg-paper-50 rounded-xl w-24"
                                     >
                                         {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>★ {n}</option>)}
                                     </select>
@@ -109,29 +109,16 @@ export default function MinhasReservas() {
                                         placeholder="Comentário"
                                         value={comentario}
                                         onChange={e => setComentario(e.target.value)}
-                                        className="p-2 border border-cream-200 bg-cream-50 rounded-xl"
+                                        className="p-2 border border-line-200 bg-paper-50 rounded-xl"
                                     />
                                     <Button
                                         onClick={() => enviarAvaliacao(reserva.id)}
-                                        disabled={!comentario.trim() || enviando}
-                                        className="self-start text-sm px-4 py-2 flex items-center gap-2"
+                                        disabled={!comentario.trim()}
+                                        loading={enviando}
+                                        className="self-start text-sm px-4 py-2"
+                                        icon={<svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4l17.45-7.48a.5.5 0 000-.92L3.4 3.52a.5.5 0 00-.7.56l1.6 6.6a1 1 0 00.78.75l9.12 1.57-9.12 1.57a1 1 0 00-.78.75l-1.6 6.6a.5.5 0 00.7.56z" /></svg>}
                                     >
-                                        {enviando ? (
-                                            <>
-                                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                                </svg>
-                                                Enviando...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M3.4 20.4l17.45-7.48a.5.5 0 000-.92L3.4 3.52a.5.5 0 00-.7.56l1.6 6.6a1 1 0 00.78.75l9.12 1.57-9.12 1.57a1 1 0 00-.78.75l-1.6 6.6a.5.5 0 00.7.56z" />
-                                                </svg>
-                                                Enviar avaliação
-                                            </>
-                                        )}
+                                        {enviando ? "Enviando..." : "Enviar avaliação"}
                                     </Button>
                                 </div>
                             ) : (

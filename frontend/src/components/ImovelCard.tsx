@@ -9,9 +9,9 @@ export function ImovelCard({ data }: { data: ImovelType }) {
     return (
         <Link
             to={`/imovel/${data.id}`}
-            className="group block bg-white rounded-2xl shadow-sm border border-cream-200 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all"
+            className="group block bg-white rounded-xl shadow-lg shadow-ink-900/5 overflow-hidden hover:shadow-xl hover:-translate-y-0.5 transition-all"
         >
-            <div className="h-44 bg-cream-100 flex items-center justify-center overflow-hidden">
+            <div className="h-44 bg-paper-50 flex items-center justify-center overflow-hidden">
                 {capa ? (
                     <img
                         src={resolverUrlImagem(capa.url)}
@@ -19,7 +19,7 @@ export function ImovelCard({ data }: { data: ImovelType }) {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                 ) : (
-                    <span className="text-brand-300 text-sm">Sem foto</span>
+                    <span className="text-ink-200 text-sm">Sem foto</span>
                 )}
             </div>
             <div className="p-4">
@@ -28,11 +28,11 @@ export function ImovelCard({ data }: { data: ImovelType }) {
                         <Badge tone="accent">✨ Destaque</Badge>
                     </div>
                 )}
-                <h5 className="mb-1 text-lg font-display font-semibold text-gray-900">{data.titulo}</h5>
-                <p className="text-sm text-gray-500 mb-2">{data.cidade} — {data.quartos} quarto(s)</p>
-                <p className="mb-1 font-display font-bold text-xl text-brand-800">
+                <h5 className="mb-1 text-lg font-display font-semibold text-ink-900">{data.titulo}</h5>
+                <p className="text-sm text-ink-400 mb-2">{data.cidade} — {data.quartos} quarto(s)</p>
+                <p className="mb-1 font-display font-bold text-xl text-ink-900">
                     R$ {Number(data.preco).toLocaleString("pt-br", { minimumFractionDigits: 2 })}
-                    <span className="text-sm font-sans font-normal text-gray-500">/mês</span>
+                    <span className="text-sm font-sans font-normal text-ink-400">/mês</span>
                 </p>
                 {data.avaliacaoMedia != null && (
                     <p className="text-sm text-accent-600 mb-1">★ {data.avaliacaoMedia.toFixed(1)}</p>

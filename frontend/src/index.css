@@ -1,43 +1,39 @@
 @import "tailwindcss";
 
 @theme {
-    --font-display: "Fraunces", serif;
-    --font-sans: "Inter", system-ui, sans-serif;
+    --font-display: "Space Grotesk", sans-serif;
+    --font-sans: "Space Grotesk", sans-serif;
 
-    /* Verde-floresta: cor primária da marca (navbar, botões, links) */
-    --color-brand-50: #f2f6f0;
-    --color-brand-100: #dfe9d9;
-    --color-brand-200: #bdd3b1;
-    --color-brand-300: #93b680;
-    --color-brand-400: #6c9a57;
-    --color-brand-500: #4f7d3e;
-    --color-brand-600: #3c6530;
-    --color-brand-700: #2f5126;
-    --color-brand-800: #26401f;
-    --color-brand-900: #1d311a;
+    /* Grafite: navbar, sidebar admin, texto principal sobre fundo claro */
+    --color-ink-900: #121212;
+    --color-ink-800: #1c1c1c;
+    --color-ink-700: #2a2a2a;
+    --color-ink-600: #45453f;
+    --color-ink-400: #6b6b66;
+    --color-ink-200: #9a9a94;
 
-    /* Terracota quente: cor de apoio (IA, destaques, acentos) */
-    --color-accent-50: #fdf3ec;
-    --color-accent-100: #fae0cc;
-    --color-accent-200: #f3bd93;
-    --color-accent-300: #ea9a60;
-    --color-accent-400: #dd7f3f;
-    --color-accent-500: #c7652a;
-    --color-accent-600: #a84f20;
-    --color-accent-700: #853e1b;
+    /* Linhas/bordas neutras sobre fundo claro */
+    --color-line-100: #ece9e1;
+    --color-line-200: #e4e4de;
 
-    /* Creme: fundo da marca */
-    --color-cream-50: #fdfbf6;
-    --color-cream-100: #faf5ea;
-    --color-cream-200: #f3ead6;
+    /* Papel: fundo das páginas do cliente */
+    --color-paper-50: #f5f5f0;
+
+    /* Lima elétrico: único acento (CTAs, badges, foco, destaques) */
+    --color-accent-100: #eefccb;
+    --color-accent-400: #c8ff4d;
+    --color-accent-500: #a8e62e;
+    --color-accent-600: #8bc423;
 }
 
 body {
-    background-color: var(--color-cream-50);
-    color: #2b2620;
+    background-color: var(--color-paper-50);
+    color: var(--color-ink-900);
     font-family: var(--font-sans);
 }
 
 h1, h2, h3 {
     font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
 }

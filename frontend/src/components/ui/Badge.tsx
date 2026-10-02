@@ -4,11 +4,11 @@ type BadgeProps = {
 }
 
 const tons = {
-    brand: "bg-brand-100 text-brand-800",
-    accent: "bg-accent-100 text-accent-700",
+    brand: "bg-ink-900 text-white",
+    accent: "bg-accent-100 text-accent-600",
     amber: "bg-amber-100 text-amber-800",
     red: "bg-red-100 text-red-700",
-    gray: "bg-gray-100 text-gray-600"
+    gray: "bg-line-100 text-ink-400"
 }
 
 export function Badge({ children, tone = "gray" }: BadgeProps) {

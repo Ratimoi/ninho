@@ -43,16 +43,16 @@ export default function ConfirmarEmail() {
     return (
         <div className="max-w-sm mx-auto mt-12">
             <Card className="p-8">
-                <h1 className="text-3xl font-display font-semibold mb-6 text-brand-900">Confirmar cadastro</h1>
+                <h1 className="text-3xl font-display font-bold mb-6 text-ink-900 tracking-tight">Confirmar cadastro</h1>
 
-                {estado === "confirmando" && <p className="text-gray-600">Confirmando seu e-mail...</p>}
+                {estado === "confirmando" && <p className="text-ink-400">Confirmando seu e-mail...</p>}
 
                 {estado === "sucesso" && (
-                    <p className="text-gray-600">Conta confirmada! Te levando pra home...</p>
+                    <p className="text-ink-400">Conta confirmada! Te levando pra home...</p>
                 )}
 
                 {estado === "erro" && (
-                    <p className="text-gray-600">
+                    <p className="text-ink-400">
                         Link inválido ou expirado. <Link to="/cadastro" className="text-accent-600 font-medium underline">Cadastre-se de novo</Link>.
                     </p>
                 )}

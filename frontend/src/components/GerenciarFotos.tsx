@@ -98,7 +98,7 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
                             <img
                                 src={resolverUrlImagem(img.url)}
                                 alt=""
-                                className={`w-full h-full object-cover rounded-xl border-2 ${img.capa ? "border-brand-600" : "border-transparent"}`}
+                                className={`w-full h-full object-cover rounded-xl border-2 ${img.capa ? "border-accent-400" : "border-transparent"}`}
                             />
                             <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1.5 bg-black/55 rounded-b-xl py-1">
                                 {!img.capa && (
@@ -124,7 +124,7 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
 
             <div className="flex flex-col gap-3">
                 <div>
-                    <label className="block text-sm text-gray-500 mb-1">Enviar do computador</label>
+                    <label className="block text-sm text-ink-400 mb-1">Enviar do computador</label>
                     <input
                         ref={inputArquivoRef}
                         type="file"
@@ -132,20 +132,20 @@ export function GerenciarFotos({ imovelId, imagens, onAtualizar }: GerenciarFoto
                         multiple
                         onChange={e => enviarArquivos(e.target.files)}
                         disabled={enviandoFotos}
-                        className="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 file:cursor-pointer disabled:opacity-50"
+                        className="block w-full text-sm text-ink-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-accent-100 file:text-ink-900 hover:file:bg-accent-400 file:cursor-pointer disabled:opacity-50"
                     />
-                    {enviandoFotos && <p className="text-sm text-gray-400 mt-1">Enviando...</p>}
+                    {enviandoFotos && <p className="text-sm text-ink-200 mt-1">Enviando...</p>}
                 </div>
 
                 <div>
-                    <label className="block text-sm text-gray-500 mb-1">Ou colar o link de uma foto já hospedada</label>
+                    <label className="block text-sm text-ink-400 mb-1">Ou colar o link de uma foto já hospedada</label>
                     <div className="flex gap-2">
                         <input
                             type="url"
                             placeholder="https://..."
                             value={urlFoto}
                             onChange={e => setUrlFoto(e.target.value)}
-                            className="flex-1 p-2.5 text-sm border border-cream-200 bg-cream-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400"
+                            className="flex-1 p-2.5 text-sm border border-line-200 bg-paper-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-400"
                         />
                         <Button type="button" variant="outline" onClick={anexarPorUrl} className="px-4 py-2 text-sm">
                             Anexar
